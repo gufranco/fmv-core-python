@@ -20,6 +20,30 @@ the same words.
 because a player that searches for a value when told `auto` decides what
 `auto` means later, and a number must reach it unchanged.
 
+## [`fmvcore/colour.py`](fmvcore/colour.py)
+
+How far a picture is from its source, measured the same way in both players.
+
+Distances are taken in Oklab, with Bjorn Ottosson's published matrices, so a
+step in any direction is roughly a step a viewer sees. `srgb_to_oklab` takes
+sRGB scaled to 0 to 1 and refuses an array whose last axis is not three
+channels, because a frame passed without its channel axis converts without
+complaint into nonsense.
+
+`oklab_error` is the mean per-pixel distance, and it is the right number for
+a picture with no dither. A dither moves pixels away from the source on
+purpose, so the per-pixel number always scores it as loss. `blurred_error`
+first runs the same separable 1, 4, 6, 4, 1 low-pass over both sides, edges
+extended, and then measures. A checkerboard of black and white then scores as
+the grey at its Oklab midpoint, which is what the eye makes of it. The
+family judges a dither by both numbers and by a rendered sheet, never by the
+blurred number alone, because two changes have won on it and looked worse on
+screen.
+
+It refuses frames of different shapes and a single frame without its batch
+axis, because either would broadcast into a plausible number that compares
+the wrong pixels.
+
 ## [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py)
 
 Drive ffmpeg to produce frames, and refuse every way a decode can go quietly

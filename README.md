@@ -16,6 +16,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | Module | What it does |
 |:--|:--|
 | [`fmvcore/arguments.py`](fmvcore/arguments.py) | Command-line value types that refuse a non-number, NaN, infinity or a value outside the player's range, naming the flag, plus `auto` for a value the player searches for |
+| [`fmvcore/colour.py`](fmvcore/colour.py) | sRGB to Oklab, and the per-pixel and blurred Oklab errors a bake is scored by against one fixed reference |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
 
 More modules arrive as each shared concern moves out of the players.
