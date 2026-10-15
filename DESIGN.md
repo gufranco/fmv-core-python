@@ -5,6 +5,51 @@ or docstrings, so the reasoning lives here, one section per module.
 [AGENTS.md](AGENTS.md) is the engineering contract and the
 [README](README.md) says what the core is and how a player uses it.
 
+## [`fmvcore/writetiming.py`](fmvcore/writetiming.py)
+
+The cheapest path, in cycles, from every write to a console port to every write
+it can reach next, across a whole program.
+
+Both players write their video hardware under documented minimum spacings that
+no emulator enforces, so each build is checked against the instructions it
+actually emitted. This module does the walking and knows nothing about any
+processor: a reader turns a listing into instructions that already carry their
+cost taken and not taken, whether they branch, call, return or never fall
+through, and which port, if any, they write. The player then holds each gap
+against its own floors.
+
+Branches are followed both ways, so a loop is measured along the path it takes
+rather than as the sum of every instruction in its range. A call reaches the
+callee's first instruction, a return reaches the instruction after every call
+site of its function or of any function that tail-jumps into it, and a tail
+jump out of the listings returns to the caller. A call to code outside the
+listings is charged its own cycles only, which can only make a path look
+faster. Each walk is a Dijkstra search bounded by the program's edge count; a
+walk that does not settle inside that bound raises rather than passing.
+
+A repeating block output, such as the Z80's `otir`, writes at its own interval
+with no instruction between, so the reader marks it and the walker reports it
+as a gap with itself.
+
+## [`fmvcore/sdccz80.py`](fmvcore/sdccz80.py)
+
+Read an SDCC Z80 assembler listing into the walker's instructions.
+
+The cycle counts are the assembler's, printed in brackets against every
+instruction, so no cycle table is kept here to disagree with the toolchain. The
+only figures of its own are what a conditional branch costs when not taken,
+which the listing does not print.
+
+The caller passes its port map, so the reader names no console. A block output
+writes through register C, so the reader follows the last constant loaded into
+it, forgets it when anything else touches C or a new function starts, and
+charges the caller's chosen port when it cannot know.
+
+SDCC reuses local labels such as `00104$` in every function, so a local label
+is scoped to the function that owns it. A function starts at a global label or
+at any label something calls or jumps to with the function prefix; a data
+label inside a function, such as a string, owns no code.
+
 ## [`fmvcore/arguments.py`](fmvcore/arguments.py)
 
 Command-line values checked where they enter, so a bad one never bakes.
