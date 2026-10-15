@@ -229,7 +229,7 @@ class TestCalls:
 
 
 class TestRefusals:
-    def test_a_call_through_a_section_symbol_is_refused(self):
+    def test_a_call_through_a_section_symbol_with_no_function_there_is_refused(self):
         # Arrange
         text = listing(
             "a.o",
@@ -244,7 +244,7 @@ class TestRefusals:
             m68kobjdump.read({"a.o": text}, ports=PORTS)
 
         # Assert
-        assert str(refused.value) == "a.o:.text 0x0000: call through section symbol .text+0x40"
+        assert str(refused.value) == "a.o:.text 0x0000: no function at .text+0x40"
 
     def test_an_unmodelled_write_form_is_refused(self):
         # Arrange
@@ -343,3 +343,62 @@ class TestDataRelocations:
         # Assert
         pushed = reading.program.listings["a.o:.text"].instructions[0]
         assert (pushed.call, pushed.jumped, pushed.target) == (None, None, None)
+
+
+class TestSectionRelativeCalls:
+    def test_a_static_function_in_another_section_is_called_and_returns(self):
+        # Arrange
+        text = "\n".join(
+            [
+                listing(
+                    "a.o",
+                    symbol(0x0, "poke"),
+                    op(0x0, "33fc 0000 003c", "movew #0,3c0002 <poke+0x3c0002>"),
+                    tail(0x6, "0002"),
+                    op(0x8, "4e75", "rts"),
+                ).rstrip("\n"),
+                "",
+                "Disassembly of section .text.startup:",
+                symbol(0x0, "main"),
+                op(0x0, "4eb9 0000 0000", "jsr 0 <main>"),
+                reloc(0x2, ".text"),
+                op(0x6, "33fc 8000 003c", "movew #-32768,3c0000 <main+0x3c0000>"),
+                tail(0xC, "0000"),
+                op(0xE, "4e75", "rts"),
+            ]
+        )
+        reading = m68kobjdump.read({"a.o": text}, ports=PORTS)
+
+        # Act
+        spacings = m68kobjdump.spacings(reading)
+
+        # Assert
+        assert [(s.source, s.to_source, s.cycles) for s in spacings] == [
+            ("a.o:.text", "a.o:.text.startup", 32)
+        ]
+
+    def test_a_section_symbol_with_an_offset_names_the_function_at_it(self):
+        # Arrange
+        text = "\n".join(
+            [
+                listing(
+                    "a.o",
+                    symbol(0x0, "first"),
+                    op(0x0, "4e75", "rts"),
+                    symbol(0x2, "second"),
+                    op(0x2, "4e75", "rts"),
+                ).rstrip("\n"),
+                "",
+                "Disassembly of section .text.startup:",
+                symbol(0x0, "main"),
+                op(0x0, "4eb9 0000 0000", "jsr 0 <main>"),
+                reloc(0x2, ".text+0x2"),
+                op(0x6, "4e75", "rts"),
+            ]
+        )
+
+        # Act
+        reading = m68kobjdump.read({"a.o": text}, ports=PORTS)
+
+        # Assert
+        assert reading.program.listings["a.o:.text.startup"].instructions[0].call == "second"

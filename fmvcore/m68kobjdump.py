@@ -16,6 +16,7 @@ BRANCH_ALWAYS_CYCLES: Final = 10
 BRANCH_CONDITIONAL_CYCLES: Final = 8
 DECREMENT_BRANCH_CYCLES: Final = 10
 SECTION_SYMBOL: Final = "."
+OFFSET_MARK: Final = "+"
 
 UNCONDITIONAL: Final = ("bra", "jra", "jmp")
 CALL: Final = ("jsr", "bsr", "jbsr")
@@ -47,6 +48,7 @@ PLAIN_INDIRECT = re.compile(r"%a[0-7]@")
 DISPLACED_INDIRECT = re.compile(r"%a[0-7]@\(-?\d+\)")
 
 Node = tuple[str, int]
+Functions = Mapping[str, Mapping[int, str]]
 
 
 class UnmodelledWriteError(ValueError):
@@ -114,9 +116,11 @@ def read(objects: Mapping[str, str], *, ports: Mapping[int, str]) -> Reading:
     listings: dict[str, Listing] = {}
     accesses: dict[Node, tuple[Access, ...]] = {}
     for name, text in objects.items():
-        for section in _sections(text):
+        sections = _sections(text)
+        functions = {s.name: dict(s.symbols) for s in sections}
+        for section in sections:
             key = f"{name}:{section.name}"
-            listing, found = _listing(key, section, ports)
+            listing, found = _listing(key, section, ports, functions)
             listings = {**listings, key: listing}
             accesses = {**accesses, **found}
     return Reading(program=Program(listings=listings, unit=CYCLE_UNIT), accesses=accesses)
@@ -189,10 +193,12 @@ def _absorb(
 
 
 def _listing(
-    key: str, section: _Section, ports: Mapping[int, str]
+    key: str, section: _Section, ports: Mapping[int, str], functions: Functions
 ) -> tuple[Listing, dict[Node, tuple[Access, ...]]]:
     profiles = _profiles(section.rows, ports)
-    instructions = [_instruction(key, row, profiles.get(row.address)) for row in section.rows]
+    instructions = [
+        _instruction(key, row, profiles.get(row.address), functions) for row in section.rows
+    ]
     owners = [_owner(section.symbols, row.address) for row in section.rows]
     labels = {name: address for address, name in section.symbols}
     found = {(key, address): accesses for address, (_, accesses) in profiles.items()}
@@ -281,14 +287,14 @@ def _indirect_profile(long_move: bool, source: str) -> tuple[int, tuple[int, ...
 
 
 def _instruction(
-    key: str, row: _Raw, profile: tuple[int, tuple[Access, ...]] | None
+    key: str, row: _Raw, profile: tuple[int, tuple[Access, ...]] | None, functions: Functions
 ) -> Instruction:
     mnemonic = row.mnemonic
     cycles = profile[0] if profile else cycles_for(mnemonic)
     kinds = [access.kind for access in profile[1] if access.kind] if profile else []
     calls = mnemonic.startswith(CALL)
     jumps = mnemonic.startswith(UNCONDITIONAL)
-    named = _named(key, row) if calls or jumps else None
+    named = _named(key, row, functions) if calls or jumps else None
     return Instruction(
         address=row.address,
         cycles=cycles,
@@ -304,14 +310,18 @@ def _instruction(
     )
 
 
-def _named(key: str, row: _Raw) -> str | None:
-    if row.relocation is not None:
-        if row.relocation.startswith(SECTION_SYMBOL):
-            msg = f"{key} 0x{row.address:04X}: call through section symbol {row.relocation}"
-            raise UnresolvedCallError(msg)
+def _named(key: str, row: _Raw, functions: Functions) -> str | None:
+    if row.relocation is None:
+        named = NAMED_TARGET.search(row.text)
+        return named.group(1) if named else None
+    if not row.relocation.startswith(SECTION_SYMBOL):
         return row.relocation
-    named = NAMED_TARGET.search(row.text)
-    return named.group(1) if named else None
+    section, _, offset = row.relocation.partition(OFFSET_MARK)
+    found = functions.get(section, {}).get(int(offset, 16) if offset else 0)
+    if found is None:
+        msg = f"{key} 0x{row.address:04X}: no function at {row.relocation}"
+        raise UnresolvedCallError(msg)
+    return found
 
 
 def _branches(mnemonic: str) -> bool:

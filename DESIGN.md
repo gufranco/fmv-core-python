@@ -69,9 +69,11 @@ refused rather than given a guess.
 
 The objects are read with relocations, `objdump -dr`, because an unlinked call
 prints as `jsr 0` with the callee only in the relocation that follows. A call
-through a section symbol rather than a named function is refused, since the
-walker resolves calls by name. A call through a register cannot be followed and
-costs its own cycles before falling through.
+to a static function in another section is relocated against the section,
+such as `.text+0x1a4`, so the reader names it by the symbol defined at that
+offset, and refuses the call when no function starts there, since the walker
+resolves calls by name. A call through a register cannot be followed and costs
+its own cycles before falling through.
 
 ## [`fmvcore/libretro.py`](fmvcore/libretro.py)
 
