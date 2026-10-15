@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    name: Commit format
+    runs-on: ubuntu-24.04
+    if: github.event_name != 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Every subject is a conventional commit
+        env:
+          BASE: >-
+            ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: >-
+            ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null \
+            || ! git merge-base --is-ancestor "$BASE" "$HEAD"; then
+            BASE="$HEAD~1"
+          fi
+          types='feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+          pattern="^($types)(\\([a-z0-9 ./-]+\\))?!?: [a-z0-9]"
+          limit=50
+          bot='dependabot[bot]'
+          bad=0
+          while IFS=$'\t' read -r author subject; do
+            [ -z "$subject" ] && continue
+            if ! printf '%s' "$subject" | grep -qE "$pattern"; then
+              echo "not a conventional, lowercase subject: $subject"
+              bad=1
+            fi
+            if [ "$author" != "$bot" ] && [ "${#subject}" -gt "$limit" ]; then
+              echo "subject longer than $limit characters (${#subject}): $subject"
+              bad=1
+            fi
+          done < <(git log --format='%an%x09%s' "$BASE..$HEAD")
+          if [ "$bad" -ne 0 ]; then
+            echo "The release version is derived from these subjects," >&2
+            echo "so the format is load-bearing." >&2
+            exit 1
+          fi
+          echo "every subject parses"
+
+  tests:
+    name: Core
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+          enable-cache: true
+
+      - name: Install ffmpeg, which the decode path shells out to
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Types
+        run: uv run mypy fmvcore
+
+      - name: Tests and coverage
+        env:
+          FMVCORE_FFMPEG_REQUIRED: "1"
+        run: >-
+          uv run python -m pytest
+          --cov=fmvcore
+          --cov-report=term-missing
+          --cov-fail-under=95
