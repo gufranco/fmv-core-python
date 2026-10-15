@@ -77,4 +77,4 @@ its golden test and regression set against a new core before moving its pin.
 
 ## License
 
-GPL-3.0, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
