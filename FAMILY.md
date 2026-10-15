@@ -179,7 +179,8 @@ the others do not also get.*
 fmv-core-python is the shared core, and its copy of this file is the one each
 player's suite checks against. It holds the range-checked command-line values,
 the Oklab distance with its plain and blurred picture errors, film identity
-checks and the verified fetch, and the decode path: probing a source, refusing
-an unreadable or torn decode, and streaming whole frames through ffmpeg with a
-frame ceiling the caller sets. The remaining shared concerns move here one
-module at a time, each taking the better-tested of the two players' versions.
+checks and the verified fetch, capture alignment with the mixed-field share
+and lag, and the decode path: probing a source, refusing an unreadable or torn
+decode, and streaming whole frames through ffmpeg with a frame ceiling the
+caller sets. The remaining shared concerns move here one module at a time,
+each taking the better-tested of the two players' versions.

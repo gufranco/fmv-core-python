@@ -20,6 +20,29 @@ the same words.
 because a player that searches for a value when told `auto` decides what
 `auto` means later, and a number must reach it unchanged.
 
+## [`fmvcore/capture.py`](fmvcore/capture.py)
+
+Compare what a screen showed, field by field, with the film it came from.
+
+Each player replays its own stream into `Played`: the picture after every
+field, and the fields on which a frame completed. That replay is the player's,
+because only the player knows its stream. What is measured on it is shared.
+
+`align` finds the offset at which an emulator recording repeats the replay
+exactly, sampling up to 48 fields across up to 64 offsets. The final field is
+left out, because what follows the last frame is the player's end-of-film
+handling, which the stream does not describe: a player that reset the screen
+on that field measured as a mismatch on a capture that was otherwise exact.
+
+`mixed_share` is the share of pixels, during a transfer, that match neither
+the frame before nor the frame after. It is the glitch at a cut, and a clean
+transfer scores zero.
+
+`measured_lags` matches each completed frame against the source within a
+window, on 8 by 8 thumbnails, and reports how many fields late it appeared.
+The lag is measured rather than taken from the encoder, so it checks the
+schedule instead of trusting it.
+
 ## [`fmvcore/clips.py`](fmvcore/clips.py)
 
 How to know a copy of a film is the one a manifest names.
