@@ -21,7 +21,9 @@ enum {
     MISSING_REFUSED = 0x02,
     OPTION_SET = 0x08,
     PIXEL_XRGB8888 = 1,
-    DUPE_EVERY = 3
+    DUPE_EVERY = 3,
+    DEVICE_JOYPAD = 1,
+    JOYPAD_IDS = 16
 };
 
 struct retro_game_info {
@@ -73,6 +75,7 @@ static environment_t environment;
 static video_t video;
 static audio_batch_t audio_batch;
 static input_poll_t input_poll;
+static input_state_t input_state;
 static uint32_t frame[PITCH_PIXELS * HEIGHT];
 static uint32_t seed;
 static unsigned count;
@@ -84,7 +87,7 @@ void retro_set_video_refresh(video_t callback) { video = callback; }
 void retro_set_audio_sample(audio_sample_t callback) { (void)callback; }
 void retro_set_audio_sample_batch(audio_batch_t callback) { audio_batch = callback; }
 void retro_set_input_poll(input_poll_t callback) { input_poll = callback; }
-void retro_set_input_state(input_state_t callback) { (void)callback; }
+void retro_set_input_state(input_state_t callback) { input_state = callback; }
 
 void retro_init(void) { count = 0; }
 void retro_deinit(void) {}
@@ -151,9 +154,21 @@ bool retro_load_game(const struct retro_game_info *game) {
 
 void retro_unload_game(void) {}
 
+static uint32_t held_mask(void) {
+    uint32_t mask = 0;
+    for (unsigned id = 0; id < JOYPAD_IDS; id += 1) {
+        if (input_state(0, DEVICE_JOYPAD, 0, id) != 0) {
+            mask |= 1u << id;
+        }
+    }
+    return mask;
+}
+
 void retro_run(void) {
     int16_t silence[4] = {0, 0, 0, 0};
+    uint32_t mask;
     input_poll();
+    mask = held_mask();
     audio_batch(silence, 2);
     if (count % DUPE_EVERY == DUPE_EVERY - 1) {
         video(NULL, WIDTH, HEIGHT, PITCH_PIXELS * sizeof(uint32_t));
@@ -163,7 +178,7 @@ void retro_run(void) {
     for (unsigned y = 0; y < HEIGHT; y += 1) {
         for (unsigned x = 0; x < WIDTH; x += 1) {
             uint32_t red = (seed + count) & 0xFF;
-            uint32_t green = (x * 16 + y) & 0xFF;
+            uint32_t green = mask != 0 ? (mask & 0xFF) : ((x * 16 + y) & 0xFF);
             uint32_t blue = answers;
             frame[y * PITCH_PIXELS + x] = (red << 16) | (green << 8) | blue;
         }

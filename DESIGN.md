@@ -107,6 +107,11 @@ The tests build a small C core from [`tests/fixtures/testcore.c`](tests/fixtures
 with the system compiler, so the host is tested against real C calls without
 downloading an emulator.
 
+A run can hold buttons on chosen frames: the caller maps a frame index to the
+joypad ids held during that frame's `retro_run`, so a capture can open a menu,
+pause or seek without anyone at the keyboard. Only port 0's joypad answers;
+every other device reads as released.
+
 ## [`fmvcore/testing.py`](fmvcore/testing.py)
 
 What every member's tests share.

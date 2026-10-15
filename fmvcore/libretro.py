@@ -3,6 +3,7 @@ from __future__ import annotations
 import ctypes
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
+from enum import IntEnum
 from pathlib import Path
 from typing import Final
 
@@ -27,6 +28,10 @@ BYTE_MASK: Final = 0xFF
 CHANNEL_BITS: Final = 5
 GREEN_565_BITS: Final = 6
 BYTE_BITS: Final = 8
+DEVICE_JOYPAD: Final = 1
+DEVICE_MOUSE: Final = 2
+PRESSED: Final = 1
+RELEASED: Final = 0
 
 Frame = npt.NDArray[np.uint8]
 
@@ -38,6 +43,21 @@ INPUT_POLL = ctypes.CFUNCTYPE(None)
 INPUT_STATE = ctypes.CFUNCTYPE(
     ctypes.c_int16, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint
 )
+
+
+class Joypad(IntEnum):
+    B = 0
+    Y = 1
+    SELECT = 2
+    START = 3
+    UP = 4
+    DOWN = 5
+    LEFT = 6
+    RIGHT = 7
+    A = 8
+    X = 9
+    L = 10
+    R = 11
 
 
 class Variable(ctypes.Structure):
@@ -59,6 +79,8 @@ class _Session:
     keep: Collection[int] | None
     options: dict[bytes, bytes]
     defaults: dict[bytes, bytes] = field(default_factory=dict)
+    held: Mapping[int, Collection[int]] = field(default_factory=dict)
+    held_now: Collection[int] = frozenset()
     pixel_format: int = RGB1555
     index: int = 0
     last: Frame | None = None
@@ -73,6 +95,7 @@ def capture(
     system_dir: Path,
     keep: Collection[int] | None = None,
     options: Mapping[str, str] | None = None,
+    held: Mapping[int, Collection[int]] | None = None,
 ) -> list[tuple[int, Frame]]:
     if frames < 1:
         msg = f"a run needs at least one frame, got {frames}"
@@ -84,10 +107,12 @@ def capture(
         msg = f"no content at {content}"
         raise FileNotFoundError(msg)
     chosen = {key.encode(): value.encode() for key, value in (options or {}).items()}
-    session = _Session(directory=str(system_dir).encode(), keep=keep, options=chosen)
+    session = _Session(
+        directory=str(system_dir).encode(), keep=keep, options=chosen, held=held or {}
+    )
     library = ctypes.CDLL(str(core))
     callbacks = _install(library, session)
-    _play(library, Path(core), Path(content), frames)
+    _play(library, session, Path(core), Path(content), frames)
     del callbacks
     return session.kept
 
@@ -133,7 +158,7 @@ def _install(library: ctypes.CDLL, session: _Session) -> tuple[object, ...]:
         AUDIO_SAMPLE(lambda _left, _right: None),
         AUDIO_BATCH(lambda _data, frames: frames),
         INPUT_POLL(lambda: None),
-        INPUT_STATE(lambda _port, _device, _index, _id: 0),
+        INPUT_STATE(lambda port, device, index, id_: _input(session, port, device, index, id_)),
     )
     names = (
         "environment",
@@ -148,7 +173,7 @@ def _install(library: ctypes.CDLL, session: _Session) -> tuple[object, ...]:
     return callbacks
 
 
-def _play(library: ctypes.CDLL, core: Path, content: Path, frames: int) -> None:
+def _play(library: ctypes.CDLL, session: _Session, core: Path, content: Path, frames: int) -> None:
     payload = content.read_bytes()
     buffer = ctypes.create_string_buffer(payload, len(payload))
     game = GameInfo(str(content).encode(), ctypes.cast(buffer, ctypes.c_void_p), len(payload), None)
@@ -158,11 +183,18 @@ def _play(library: ctypes.CDLL, core: Path, content: Path, frames: int) -> None:
         if not library.retro_load_game(ctypes.byref(game)):
             msg = f"{core.name} refused {content}"
             raise RuntimeError(msg)
-        for _ in range(frames):
+        for run in range(frames):
+            session.held_now = frozenset(session.held.get(run, ()))
             library.retro_run()
         library.retro_unload_game()
     finally:
         library.retro_deinit()
+
+
+def _input(session: _Session, port: int, device: int, index: int, id_: int) -> int:
+    if port != 0 or device != DEVICE_JOYPAD or index != 0:
+        return RELEASED
+    return PRESSED if id_ in session.held_now else RELEASED
 
 
 def _environment(session: _Session, command: int, data: int | None) -> bool:

@@ -216,3 +216,29 @@ class TestDeclaredOptions:
         assert str(refused.value) == (
             f"a core declared more than {libretro.MAX_VARIABLES} options without ending the list"
         )
+
+
+@pytest.mark.cc
+class TestScriptedInput:
+    def test_buttons_are_held_only_on_the_frames_scheduled(self, core, content, tmp_path):
+        # Arrange
+        held = {1: frozenset({libretro.Joypad.START, libretro.Joypad.B})}
+
+        # Act
+        captured = libretro.capture(
+            core, content, frames=3, system_dir=tmp_path, options=OPTIONS, held=held
+        )
+
+        # Assert
+        assert [int(frame[0, 0, 1]) for _, frame in captured] == [0, 0b1001, 0b1001]
+
+    def test_an_unknown_device_reads_as_released(self):
+        # Arrange
+        session = libretro._Session(directory=b"", keep=None, options={})
+        session.held_now = frozenset({libretro.Joypad.B})
+
+        # Act
+        state = libretro._input(session, 0, libretro.DEVICE_MOUSE, 0, libretro.Joypad.B)
+
+        # Assert
+        assert state == 0
