@@ -255,8 +255,8 @@ fmv-core-python is the shared core, and its copy of this file is the one each
 player's suite checks against. It holds the range-checked command-line values,
 the Oklab distance with its plain and blurred picture errors, film identity
 checks and the verified fetch, capture alignment with the mixed-field share
-and lag, the cheapest-path write-timing walk with an SDCC Z80 reader, and the
-decode path: probing a source, refusing an unreadable or torn decode, and
-streaming whole frames through ffmpeg with a frame ceiling the caller sets.
-The remaining shared concerns move here one module at a time, each taking the
-better-tested of the two players' versions.
+and lag, the cheapest-path write-timing walk with an SDCC Z80 reader, the
+shared test helpers, and the decode path: probing a source, refusing an
+unreadable or torn decode, and streaming whole frames through ffmpeg with a
+frame ceiling the caller sets. The remaining shared concerns move here one
+module at a time, each taking the better-tested of the two players' versions.

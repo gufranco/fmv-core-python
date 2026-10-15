@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from fakes import seeded
 
 from fmvcore import fetch
+from fmvcore.testing import seeded
 
 FAKE = seeded()
 PRETEND_FILM = FAKE.binary(length=12)

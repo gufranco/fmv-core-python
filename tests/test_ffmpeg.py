@@ -3,9 +3,9 @@ import sys
 from pathlib import Path
 
 import pytest
-from fakes import seeded
 
 from fmvcore import ffmpeg
+from fmvcore.testing import seeded
 
 FAKE = seeded()
 FILM = FAKE.file_name(extension="mp4")

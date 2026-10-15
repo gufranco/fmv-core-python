@@ -39,7 +39,7 @@ player has run its own gates against the new commit.
 - `mypy` strict, `ruff` clean, every loop bounded by a ceiling the caller can
   see.
 - Test values that do not matter come from the seeded fakes in
-  [`tests/fakes.py`](tests/fakes.py).
+  [`fmvcore/testing.py`](fmvcore/testing.py).
 - Every test is Arrange, Act, Assert, each opened by its bare marker.
 
 ## Things that will bite you

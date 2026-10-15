@@ -4,9 +4,9 @@ import hashlib
 from dataclasses import dataclass
 
 import pytest
-from fakes import seeded
 
 from fmvcore import clips
+from fmvcore.testing import seeded
 
 FAKE = seeded()
 FILM = FAKE.file_name(extension="mp4")

@@ -50,6 +50,21 @@ is scoped to the function that owns it. A function starts at a global label or
 at any label something calls or jumps to with the function prefix; a data
 label inside a function, such as a string, owns no code.
 
+## [`fmvcore/testing.py`](fmvcore/testing.py)
+
+What every member's tests share.
+
+`seeded` returns a Faker seeded with the family's one seed, so a value that
+does not matter to a test is still the same value on every run and every
+machine. `require_tools` is the body of a `pytest_runtest_setup` hook: a test
+carrying the given marker skips when one of its tools is missing, and fails
+instead when the named environment variable is `1`, which CI and the
+pre-commit hooks set. A test that silently skipped in CI would report a gate
+as passed that never ran.
+
+It imports pytest and Faker, which every member already has as test
+dependencies, so only test code imports it.
+
 ## [`fmvcore/arguments.py`](fmvcore/arguments.py)
 
 Command-line values checked where they enter, so a bad one never bakes.
