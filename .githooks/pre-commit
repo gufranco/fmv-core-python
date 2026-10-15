@@ -1,41 +1,22 @@
 #!/usr/bin/env python3
-import os
-import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from fmvcore.hook import Check, Gates, run  # noqa: E402
+
 UV = ("uv", "run")
-CHECKS = (
-    ("format", (*UV, "ruff", "format", "--check", ".")),
-    ("lint", (*UV, "ruff", "check", ".")),
-    ("types", (*UV, "mypy", "fmvcore")),
-    ("tests", (*UV, "python", "-m", "pytest", "--cov=fmvcore", "--cov-fail-under=95")),
+GATES = Gates(
+    always=(
+        Check("format", (*UV, "ruff", "format", "--check", ".")),
+        Check("lint", (*UV, "ruff", "check", ".")),
+        Check("types", (*UV, "mypy", "fmvcore")),
+        Check("tests", (*UV, "python", "-m", "pytest", "--cov=fmvcore", "--cov-fail-under=95")),
+    ),
+    always_required={"FMVCORE_FFMPEG_REQUIRED": "1", "FMVCORE_CC_REQUIRED": "1"},
 )
-REQUIRED = {"FMVCORE_FFMPEG_REQUIRED": "1", "FMVCORE_CC_REQUIRED": "1"}
-
-
-def failures() -> list[str]:
-    environment = {**os.environ, **REQUIRED}
-    failed: list[str] = []
-    for name, command in CHECKS:
-        done = subprocess.run(
-            command, cwd=ROOT, capture_output=True, text=True, check=False, env=environment
-        )
-        if done.returncode != 0:
-            failed = [*failed, name]
-            sys.stderr.write(done.stdout)
-            sys.stderr.write(done.stderr)
-    return failed
-
-
-def main() -> int:
-    failed = failures()
-    if failed:
-        sys.stderr.write(f"\ncommit refused: {', '.join(failed)}\n")
-        return 1
-    return 0
-
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run(ROOT, GATES))

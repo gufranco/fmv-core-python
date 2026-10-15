@@ -25,6 +25,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/m68kobjdump.py`](fmvcore/m68kobjdump.py) | Reads 68000 objdump disassembly for that walk, and measures the spacing between bus accesses |
 | [`fmvcore/libretro.py`](fmvcore/libretro.py) | Runs a libretro core headless, with no window or sound, and returns the frames it draws |
 | [`fmvcore/testing.py`](fmvcore/testing.py) | The family's seeded Faker, and the marker gate that skips a test without its tool unless a variable requires it |
+| [`fmvcore/hook.py`](fmvcore/hook.py) | The pre-commit body every member runs: its checks always, its player checks when a player path is staged |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
 
 More modules arrive as each shared concern moves out of the players.

@@ -253,3 +253,15 @@ only guarantees the loop stops there and says so by name.
 video stream, a zero or infinite duration, a non-positive frame rate or a
 rate of `0/0`. Each refusal names the file, because a bake usually walks
 several.
+
+## [`fmvcore/hook.py`](fmvcore/hook.py)
+
+Run a member's pre-commit checks and refuse the commit when one fails.
+
+Every member had its own copy of the same loop, and the copies had started to
+drift. The loop lives here and each repository's hook keeps only its list:
+the checks that always run, the player checks that run only when a staged path
+can change what reaches the console, and the environment that makes a skipped
+test fail instead. The module uses only the standard library, because a hook
+runs under the system Python before any project environment exists.
+
