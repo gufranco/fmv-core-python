@@ -28,6 +28,9 @@ The family's rules, and what belongs in the core versus a player, are in
 
 More modules arrive as each shared concern moves out of the players.
 
+[`features/`](features) holds the feature table both players' READMEs carry, in
+English and each translation; a player's tests compare its README against it.
+
 ## How a player uses it
 
 A player carries this repository as a git submodule at its root and puts it on

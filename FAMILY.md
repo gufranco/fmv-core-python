@@ -57,6 +57,8 @@ the requirement.
   that player's README feature table, marked as not possible, with the reason
   in one sentence: the hardware limit, its figure and its source. Not built yet
   is never written as not possible.
+  The table is kept once, per language, in `fmv-core-python/features/`, and
+  each player's suite fails when its README's copy differs from it.
 
 - **The picture fills the screen.** A source of any shape is scaled until it
   covers the console's raster and then cropped, so a wide film loses its sides.
