@@ -22,6 +22,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/colour.py`](fmvcore/colour.py) | sRGB to Oklab, and the per-pixel and blurred Oklab errors a bake is scored by against one fixed reference |
 | [`fmvcore/writetiming.py`](fmvcore/writetiming.py) | The cheapest path in cycles between port writes across a whole program, for any processor a reader describes |
 | [`fmvcore/sdccz80.py`](fmvcore/sdccz80.py) | Reads SDCC Z80 listings for that walk, with the caller's port map |
+| [`fmvcore/m68kobjdump.py`](fmvcore/m68kobjdump.py) | Reads 68000 objdump disassembly for that walk, and measures the spacing between bus accesses |
 | [`fmvcore/libretro.py`](fmvcore/libretro.py) | Runs a libretro core headless, with no window or sound, and returns the frames it draws |
 | [`fmvcore/testing.py`](fmvcore/testing.py) | The family's seeded Faker, and the marker gate that skips a test without its tool unless a variable requires it |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |

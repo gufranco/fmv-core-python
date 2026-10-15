@@ -50,6 +50,29 @@ is scoped to the function that owns it. A function starts at a global label or
 at any label something calls or jumps to with the function prefix; a data
 label inside a function, such as a string, owns no code.
 
+## [`fmvcore/m68kobjdump.py`](fmvcore/m68kobjdump.py)
+
+Read GNU objdump disassembly of 68000 objects into the walker's program, and
+turn the walker's gaps into the spacing between bus accesses.
+
+objdump prints no cycle counts, so the reader keeps a table of the instructions
+the players emit and charges four cycles, the shortest 68000 instruction, for
+anything else. Undercounting reports a pair as closer than it is, so an
+instruction missing from the table can only make the gate stricter.
+
+A 68000 write reaches the bus partway through its instruction, and a long write
+reaches it twice, one word at the address and the next word two bytes on. Each
+modelled write form carries the offsets of those accesses, so the spacing
+between two writes is measured from the end of the first one's last bus cycle
+to the start of the next one's first. A write form outside the model is
+refused rather than given a guess.
+
+The objects are read with relocations, `objdump -dr`, because an unlinked call
+prints as `jsr 0` with the callee only in the relocation that follows. A call
+through a section symbol rather than a named function is refused, since the
+walker resolves calls by name. A call through a register cannot be followed and
+costs its own cycles before falling through.
+
 ## [`fmvcore/libretro.py`](fmvcore/libretro.py)
 
 Run any libretro core from Python with no window, no sound and no front end,
