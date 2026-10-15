@@ -4,7 +4,9 @@ from fmvcore import testing
 
 FFMPEG_REQUIRED_ENV = "FMVCORE_FFMPEG_REQUIRED"
 DECODERS = ("ffmpeg", "ffprobe")
+CC_REQUIRED_ENV = "FMVCORE_CC_REQUIRED"
 
 
 def pytest_runtest_setup(item: pytest.Item) -> None:
     testing.require_tools(item, marker="ffmpeg", tools=DECODERS, required_env=FFMPEG_REQUIRED_ENV)
+    testing.require_tools(item, marker="cc", tools=("cc",), required_env=CC_REQUIRED_ENV)

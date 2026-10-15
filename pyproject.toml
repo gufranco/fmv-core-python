@@ -53,6 +53,7 @@ addopts = "-q"
 filterwarnings = ["error"]
 markers = [
     "ffmpeg: decodes through ffmpeg; skipped without it unless FMVCORE_FFMPEG_REQUIRED=1",
+    "cc: compiles a C fixture; skipped without cc unless FMVCORE_CC_REQUIRED=1",
 ]
 
 [tool.coverage.run]

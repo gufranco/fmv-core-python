@@ -12,7 +12,7 @@ CHECKS = (
     ("types", (*UV, "mypy", "fmvcore")),
     ("tests", (*UV, "python", "-m", "pytest", "--cov=fmvcore", "--cov-fail-under=95")),
 )
-REQUIRED = {"FMVCORE_FFMPEG_REQUIRED": "1"}
+REQUIRED = {"FMVCORE_FFMPEG_REQUIRED": "1", "FMVCORE_CC_REQUIRED": "1"}
 
 
 def failures() -> list[str]:

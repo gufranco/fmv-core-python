@@ -23,7 +23,7 @@ the player owns.
 | Formatted | `uv run ruff format --check .` |
 | Lint clean | `uv run ruff check .` |
 | Types hold | `uv run mypy fmvcore` |
-| Behaviour holds | `FMVCORE_FFMPEG_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=95` |
+| Behaviour holds | `FMVCORE_FFMPEG_REQUIRED=1 FMVCORE_CC_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=95` |
 | A commit is clean | `.githooks/pre-commit`, installed once by `make hooks` |
 | Both players still bake the same | each player's golden test and regression set against this commit |
 

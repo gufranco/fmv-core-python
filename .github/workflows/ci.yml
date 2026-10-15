@@ -87,6 +87,7 @@ jobs:
       - name: Tests and coverage
         env:
           FMVCORE_FFMPEG_REQUIRED: "1"
+          FMVCORE_CC_REQUIRED: "1"
         run: >-
           uv run python -m pytest
           --cov=fmvcore

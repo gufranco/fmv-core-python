@@ -39,6 +39,7 @@ jobs:
       - name: The gate the CI job runs
         env:
           FMVCORE_FFMPEG_REQUIRED: "1"
+          FMVCORE_CC_REQUIRED: "1"
         run: |
           set -euo pipefail
           uv run ruff format --check .

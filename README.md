@@ -22,6 +22,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/colour.py`](fmvcore/colour.py) | sRGB to Oklab, and the per-pixel and blurred Oklab errors a bake is scored by against one fixed reference |
 | [`fmvcore/writetiming.py`](fmvcore/writetiming.py) | The cheapest path in cycles between port writes across a whole program, for any processor a reader describes |
 | [`fmvcore/sdccz80.py`](fmvcore/sdccz80.py) | Reads SDCC Z80 listings for that walk, with the caller's port map |
+| [`fmvcore/libretro.py`](fmvcore/libretro.py) | Runs a libretro core headless, with no window or sound, and returns the frames it draws |
 | [`fmvcore/testing.py`](fmvcore/testing.py) | The family's seeded Faker, and the marker gate that skips a test without its tool unless a variable requires it |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
 
@@ -52,15 +53,15 @@ git clone --recurse-submodules https://github.com/gufranco/<player>.git
 
 ## Working on it
 
-It needs [uv](https://docs.astral.sh/uv/), and `ffmpeg` with `ffprobe` on the
-path for the decode tests.
+It needs [uv](https://docs.astral.sh/uv/), `ffmpeg` with `ffprobe` on the path
+for the decode tests, and a C compiler as `cc` for the libretro host tests.
 
 ```bash
 make hooks
 uv run ruff format --check .
 uv run ruff check .
 uv run mypy fmvcore
-FMVCORE_FFMPEG_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=95
+FMVCORE_FFMPEG_REQUIRED=1 FMVCORE_CC_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=95
 ```
 
 The pre-commit hook runs the same four gates. Tests that need ffmpeg skip

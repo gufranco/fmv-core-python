@@ -50,6 +50,38 @@ is scoped to the function that owns it. A function starts at a global label or
 at any label something calls or jumps to with the function prefix; a data
 label inside a function, such as a string, owns no code.
 
+## [`fmvcore/libretro.py`](fmvcore/libretro.py)
+
+Run any libretro core from Python with no window, no sound and no front end,
+and keep the frames it draws.
+
+The family's evidence comes from emulators, and an emulator that opens a window
+takes the owner's screen while they work. Driving the core's C entry points
+directly removes the window by construction rather than by a flag that one
+platform ignores: geolith captures the Neo Geo player this way, and any other
+libretro core can stand in for another console.
+
+The host answers the handful of environment calls a core needs to start: the
+system and save directories, the pixel format, the duplicate-frame capability,
+and core options. A core declares its options with their defaults, and the host
+answers each query with the caller's value or that default, because a core that
+gets no answer may leave a setting unset. geolith drew a black screen until
+this was answered. Every other call is refused, which a well-behaved core
+treats as an older front end.
+
+A duplicated frame, a null pointer from the core, repeats the last picture, so
+the frame index always matches the core's own frame count. Only the indices the
+caller keeps are copied out, because a run of thousands of frames would
+otherwise hold every one of them in memory.
+
+The C callbacks can only report back by writing to a session object, so that
+object is mutable by design, and the callback objects are held for the whole
+run, since ctypes frees a callback the moment nothing references it.
+
+The tests build a small C core from [`tests/fixtures/testcore.c`](tests/fixtures/testcore.c)
+with the system compiler, so the host is tested against real C calls without
+downloading an emulator.
+
 ## [`fmvcore/testing.py`](fmvcore/testing.py)
 
 What every member's tests share.
