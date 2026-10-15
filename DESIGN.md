@@ -184,6 +184,14 @@ sRGB scaled to 0 to 1 and refuses an array whose last axis is not three
 channels, because a frame passed without its channel axis converts without
 complaint into nonsense.
 
+The conversion runs in float64 and returns float32, as two matrix products,
+the form the Neo Geo player used. The two players had computed it differently,
+one in float32 with the sums written out, and the two disagreed by one rounding
+step on 31 of the 98,304 values over the Neo Geo's colour grid, enough to flip
+near-tied colour choices. Taking the more precise form leaves the Neo Geo's
+bakes byte-identical and moves the Master System's by those near-ties, which
+its picture tests and the regression set accept.
+
 `oklab_error` is the mean per-pixel distance, and it is the right number for
 a picture with no dither. A dither moves pixels away from the source on
 purpose, so the per-pixel number always scores it as loss. `blurred_error`

@@ -10,6 +10,20 @@ BYTE_MAX: Final = 255.0
 SRGB_LINEAR_LIMIT: Final = 0.04045
 BLUR_TAPS: Final = (1.0, 4.0, 6.0, 4.0, 1.0)
 FRAMES_NDIM: Final = 4
+TO_CONES: Final = np.array(
+    [
+        [0.4122214708, 0.5363325363, 0.0514459929],
+        [0.2119034982, 0.6806995451, 0.1073969566],
+        [0.0883024619, 0.2817188376, 0.6299787005],
+    ]
+)
+TO_OKLAB: Final = np.array(
+    [
+        [0.2104542553, 0.7936177850, -0.0040720468],
+        [1.9779984951, -2.4285922050, 0.4505937099],
+        [0.0259040371, 0.7827717662, -0.8086757660],
+    ]
+)
 
 Frames = npt.NDArray[np.uint8]
 
@@ -18,30 +32,16 @@ def srgb_to_oklab(rgb: npt.NDArray[np.floating]) -> npt.NDArray[np.float32]:
     if rgb.shape[-1] != RGB_CHANNELS:
         msg = f"expected a trailing RGB axis, got shape {rgb.shape}"
         raise ValueError(msg)
-    value = np.asarray(rgb, dtype=np.float32)
+    value = np.asarray(rgb, dtype=np.float64)
     linear = np.where(
         value <= SRGB_LINEAR_LIMIT,
         value / 12.92,
         np.power((value + 0.055) / 1.055, 2.4),
-    ).astype(np.float32)
+    )
 
-    red = linear[..., 0]
-    green = linear[..., 1]
-    blue = linear[..., 2]
-
-    long_cone = 0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue
-    medium_cone = 0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue
-    short_cone = 0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue
-
-    long_root = np.cbrt(long_cone)
-    medium_root = np.cbrt(medium_cone)
-    short_root = np.cbrt(short_cone)
-
-    lightness = 0.2104542553 * long_root + 0.7936177850 * medium_root - 0.0040720468 * short_root
-    green_red = 1.9779984951 * long_root - 2.4285922050 * medium_root + 0.4505937099 * short_root
-    blue_yellow = 0.0259040371 * long_root + 0.7827717662 * medium_root - 0.8086757660 * short_root
-
-    return np.stack([lightness, green_red, blue_yellow], axis=-1).astype(np.float32)
+    cones: npt.NDArray[np.float64] = linear @ TO_CONES.T
+    lab: npt.NDArray[np.float64] = np.cbrt(cones) @ TO_OKLAB.T
+    return lab.astype(np.float32)
 
 
 def oklab_error(shown: Frames, wanted: Frames) -> float:
