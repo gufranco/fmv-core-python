@@ -16,6 +16,8 @@ The family's rules, and what belongs in the core versus a player, are in
 | Module | What it does |
 |:--|:--|
 | [`fmvcore/arguments.py`](fmvcore/arguments.py) | Command-line value types that refuse a non-number, NaN, infinity or a value outside the player's range, naming the flag, plus `auto` for a value the player searches for |
+| [`fmvcore/clips.py`](fmvcore/clips.py) | Verifies a copy of a film against the identity its manifest publishes, saying whether it is a different film or an altered one |
+| [`fmvcore/fetch.py`](fmvcore/fetch.py) | Fetches a film to a partial file, retries transient failures, refuses an oversized or endless download, and keeps the file only once it verifies |
 | [`fmvcore/colour.py`](fmvcore/colour.py) | sRGB to Oklab, and the per-pixel and blurred Oklab errors a bake is scored by against one fixed reference |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
 

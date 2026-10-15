@@ -20,6 +20,45 @@ the same words.
 because a player that searches for a value when told `auto` decides what
 `auto` means later, and a number must reach it unchanged.
 
+## [`fmvcore/clips.py`](fmvcore/clips.py)
+
+How to know a copy of a film is the one a manifest names.
+
+A regression set has to name films the repository cannot carry, so a player
+carries their identity instead: a SHA-256 that decides accept or reject, a
+byte count that rejects the wrong file for one stat call, and a CRC-32 and
+SHA-1 that let a copy be cross-checked against a public index.
+
+`verify` takes any record with the identity fields, the `Film` protocol, so
+each player keeps its own manifest schema and the per-film expectations it
+measures, and both check identity the same way. SHA-256 decides. The size is
+checked first because it rejects the wrong file without reading it, and
+because the two failures mean different things: a size that does not match is
+a different film, while a size that matches with a digest that does not is
+the right film re-encoded, cut or corrupted. Saying which is what turns a
+refusal into something the reader can act on, and every refusal ends with the
+player's own fetch command.
+
+A film with no published digest is refused outright, because nothing can
+recognise a copy of it.
+
+## [`fmvcore/fetch.py`](fmvcore/fetch.py)
+
+Fetch a film the manifest names and keep it only if it verifies.
+
+Nothing downloads on its own: a player's fetch script calls `acquire` for the
+films it wants. The download goes to a `.part` file beside the target and is
+renamed over it only after it verifies, so a half-right file never sits where
+the next run would report it present. A committed film is checked and never
+downloaded, and a stale copy is replaced rather than kept.
+
+A connection reset, a timeout or a torn read is retried up to three times,
+waiting five and then ten seconds. A download larger than the manifest's byte
+count, or one that never ends, is refused at once and never retried, because a
+retry would only fetch the same wrong thing again. The block ceiling and block
+size are parameters so a test can reach the never-ending case without a
+four-gigabyte stream.
+
 ## [`fmvcore/colour.py`](fmvcore/colour.py)
 
 How far a picture is from its source, measured the same way in both players.
