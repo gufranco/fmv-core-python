@@ -5,6 +5,14 @@ every member of the family follows, and it binds here first; this file adds
 what is particular to the core. [DESIGN.md](DESIGN.md) records why each module
 is shaped as it is.
 
+## One family, no ports
+
+Owner's instruction, 2026-10-15: the players and the core are members of one
+family of tools. Never describe one as a port, fork, translation or derivative
+of another, in a README, a commit, a comment or any other text, in any
+language. The Neo Geo player came first, but work has moved between the
+members in both directions since, and more consoles will join.
+
 ## What belongs here
 
 A concern moves into the core when both players need it and no hardware forces
