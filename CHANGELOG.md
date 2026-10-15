@@ -6,7 +6,7 @@ version history.
 
 ## The decode path moves out of the Master System player
 
-The first shared module is the decode path from sms-movie-player, chosen over
+The first shared module is the decode path from sms-media-player, chosen over
 the Neo Geo player's because it refuses more. Both of the Neo Geo player's
 decodes cut a trailing partial frame off without a word. Its streaming decode
 also sends ffmpeg's error stream to `/dev/null` and never reads the exit code,
