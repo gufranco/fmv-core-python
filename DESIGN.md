@@ -5,6 +5,21 @@ or docstrings, so the reasoning lives here, one section per module.
 [AGENTS.md](AGENTS.md) is the engineering contract and the
 [README](README.md) says what the core is and how a player uses it.
 
+## [`fmvcore/arguments.py`](fmvcore/arguments.py)
+
+Command-line values checked where they enter, so a bad one never bakes.
+
+In the Master System player a rate of zero divided by zero deep inside
+pacing, a negative one paced every frame to a single field, and a reuse
+threshold of NaN baked a ROM. Each of those is refused here with the range it
+had to lie in. The ranges belong to the player; this module only holds the
+shape of the check and its messages, so both players refuse a bad value in
+the same words.
+
+`number_or_auto` keeps the text it was given rather than the parsed number,
+because a player that searches for a value when told `auto` decides what
+`auto` means later, and a number must reach it unchanged.
+
 ## [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py)
 
 Drive ffmpeg to produce frames, and refuse every way a decode can go quietly

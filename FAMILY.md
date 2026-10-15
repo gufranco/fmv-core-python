@@ -177,8 +177,9 @@ the others do not also get.*
 ## The state of this repository
 
 fmv-core-python is the shared core, and its copy of this file is the one each
-player's suite checks against. It holds the decode path: probing a source,
-refusing an unreadable or torn decode, and streaming whole frames through
-ffmpeg with a frame ceiling the caller sets. The remaining shared concerns move
+player's suite checks against. It holds the range-checked command-line
+values, and the decode path: probing a source, refusing an unreadable or torn
+decode, and streaming whole frames through ffmpeg with a frame ceiling the
+caller sets. The remaining shared concerns move
 here one module at a time, each taking the better-tested of the two players'
 versions.
