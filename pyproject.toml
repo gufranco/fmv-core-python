@@ -3,6 +3,8 @@ name = "fmvcore"
 version = "0.1.0"
 description = "The baker and measurement code shared by the full-motion video players of one family"
 requires-python = ">=3.14"
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "numpy==2.5.4",
 ]
