@@ -291,3 +291,19 @@ and a rebuild means updating its digest in every member's manifest.
 
     uv run python -m fmvcore.fixture
 
+## [`fmvcore/source.py`](fmvcore/source.py)
+
+Find what a source carries before any frame is scaled: bars and interlacing.
+
+Every player fills its screen with the picture, so bars baked into a source
+have to be found and cropped first, or they are encoded, cost tiles and are
+sent every field. ffmpeg's `cropdetect` reports the picture's extent, and the
+last report over the window wins. A crop is returned only when it is smaller
+than the frame.
+
+`idet` decides interlacing by comparing woven fields against progressive
+frames. ffmpeg can print its summary more than once, the first time with all
+counts at zero, so the last summary decides. A fine high-contrast test pattern
+such as `testsrc2` reads as woven even when it is progressive, so the tests
+use the family's synthetic clip and a woven copy of it instead.
+
