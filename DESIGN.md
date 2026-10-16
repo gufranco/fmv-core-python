@@ -272,3 +272,22 @@ can change what reaches the console, and the environment that makes a skipped
 test fail instead. The module uses only the standard library, because a hook
 runs under the system Python before any project environment exists.
 
+## [`fmvcore/fixture.py`](fmvcore/fixture.py)
+
+Build the one film every member's regression set can always run.
+
+A film cannot be committed, and a gate that needs a download does not run on
+a clean clone. This builds a small clip from arithmetic, so the committed
+[`fixtures/synthetic.mp4`](fixtures/synthetic.mp4) is the family's own work.
+The block field gives large areas of one colour so an encoder can reuse
+tiles, the ramp varies inside every eight by eight cell so no cell is flat,
+and the sweep and the moving bar change every frame so the reuse and
+allocation logic both work.
+
+Two builds on one machine write the same bytes, but libx264 versions differ
+in what they write: a rebuild here on 2026-10-16 came out the same size with
+a different SHA-256. The committed file is the identity the manifests check,
+and a rebuild means updating its digest in every member's manifest.
+
+    uv run python -m fmvcore.fixture
+
