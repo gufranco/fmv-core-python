@@ -42,6 +42,23 @@ def require_tool(name: str) -> str:
     return found
 
 
+def has_audio(path: Path) -> bool:
+    command = [
+        require_tool("ffprobe"),
+        "-v",
+        "error",
+        "-select_streams",
+        "a",
+        "-show_entries",
+        "stream=index",
+        "-of",
+        "csv=p=0",
+        str(path),
+    ]
+    done = subprocess.run(command, capture_output=True, text=True, check=True)
+    return bool(done.stdout.strip())
+
+
 def check_scaler(scaler: str) -> None:
     if scaler not in SCALERS:
         msg = f"scaler {scaler!r} is not one of {', '.join(SCALERS)}"

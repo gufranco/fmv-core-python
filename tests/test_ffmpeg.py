@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from fmvcore import ffmpeg
+from fmvcore import ffmpeg, fixture
 from fmvcore.testing import seeded
 
 FAKE = seeded()
@@ -313,3 +313,29 @@ class TestScalerCheck:
             "scaler 'nearest' is not one of area, bicubic, bilinear, fast_bilinear, gauss, "
             "lanczos, neighbor, sinc, spline"
         )
+
+
+@pytest.mark.ffmpeg
+class TestAudioStreams:
+    def test_a_film_with_a_soundtrack_has_audio(self, tmp_path):
+        # Arrange
+        clip = tmp_path / "sounded.mp4"
+        command = ["ffmpeg", "-y", "-loglevel", "error", "-i", str(fixture.FIXTURE)]
+        tone = ["-f", "lavfi", "-i", "sine=frequency=440:duration=2", "-shortest"]
+        subprocess.run([*command, *tone, "-c:v", "copy", "-c:a", "aac", str(clip)], check=True)
+
+        # Act
+        found = ffmpeg.has_audio(clip)
+
+        # Assert
+        assert found is True
+
+    def test_a_picture_only_film_has_no_audio(self):
+        # Arrange
+        clip = fixture.FIXTURE
+
+        # Act
+        found = ffmpeg.has_audio(clip)
+
+        # Assert
+        assert found is False
