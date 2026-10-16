@@ -32,6 +32,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/subtitles.py`](fmvcore/subtitles.py) | Parses SubRip files, trims overlapping cues, finds the cue at a moment and wraps text to a column count |
 | [`fmvcore/font.py`](fmvcore/font.py) | The 8x8 glyph art in [`fmvcore/glyphs.json`](fmvcore/glyphs.json) both players draw text with |
 | [`fmvcore/bundle.py`](fmvcore/bundle.py) | Copies a player's library into a drop-in bundle and renders the bundle's guide from a template |
+| [`fmvcore/ladder.py`](fmvcore/ladder.py) | Finds the best rung of a quality ladder that still fits, with a galloping then binary search so each costly bake is asked for as few times as possible |
 
 More modules arrive as each shared concern moves out of the players.
 
