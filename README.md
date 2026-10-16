@@ -31,6 +31,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/source.py`](fmvcore/source.py) | Finds black bars baked into a source and whether it is interlaced, before the picture is scaled |
 | [`fmvcore/subtitles.py`](fmvcore/subtitles.py) | Parses SubRip files, trims overlapping cues, finds the cue at a moment and wraps text to a column count |
 | [`fmvcore/font.py`](fmvcore/font.py) | The 8x8 glyph art in [`fmvcore/glyphs.json`](fmvcore/glyphs.json) both players draw text with |
+| [`fmvcore/bundle.py`](fmvcore/bundle.py) | Copies a player's library into a drop-in bundle and renders the bundle's guide from a template |
 
 More modules arrive as each shared concern moves out of the players.
 
