@@ -1,3 +1,4 @@
+---
 name: Release
 
 on:
@@ -17,7 +18,7 @@ permissions:
 jobs:
   gates:
     name: Gates
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -50,7 +51,7 @@ jobs:
   publish:
     name: Publish
     needs: gates
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     steps:

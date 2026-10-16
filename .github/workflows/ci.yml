@@ -1,3 +1,4 @@
+---
 name: CI
 
 on:
@@ -16,7 +17,7 @@ permissions:
 jobs:
   commits:
     name: Commit format
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: github.event_name != 'workflow_dispatch'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -47,7 +48,7 @@ jobs:
               bad=1
             fi
             if [ "$author" != "$bot" ] && [ "${#subject}" -gt "$limit" ]; then
-              echo "subject longer than $limit characters (${#subject}): $subject"
+              echo "subject over $limit characters (${#subject}): $subject"
               bad=1
             fi
           done < <(git log --format='%an%x09%s' "$BASE..$HEAD")
@@ -60,7 +61,7 @@ jobs:
 
   tests:
     name: Core
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
