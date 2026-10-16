@@ -29,6 +29,8 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/fixture.py`](fmvcore/fixture.py) | Builds the synthetic clip every member's regression set runs, committed as [`fixtures/synthetic.mp4`](fixtures/synthetic.mp4) |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
 | [`fmvcore/source.py`](fmvcore/source.py) | Finds black bars baked into a source and whether it is interlaced, before the picture is scaled |
+| [`fmvcore/subtitles.py`](fmvcore/subtitles.py) | Parses SubRip files, trims overlapping cues, finds the cue at a moment and wraps text to a column count |
+| [`fmvcore/font.py`](fmvcore/font.py) | The 8x8 glyph art in [`fmvcore/glyphs.json`](fmvcore/glyphs.json) both players draw text with |
 
 More modules arrive as each shared concern moves out of the players.
 
