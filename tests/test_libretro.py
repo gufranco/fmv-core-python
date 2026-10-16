@@ -242,3 +242,27 @@ class TestScriptedInput:
 
         # Assert
         assert state == 0
+
+
+class TestDirectories:
+    def test_the_save_directory_is_answered_apart_from_the_system_directory(self):
+        # Arrange
+        session = libretro._Session(directory=b"/system", keep=None, options={}, saves=b"/saves")
+        answer = ctypes.c_char_p()
+
+        # Act
+        libretro._environment(session, libretro.ENV_GET_SAVE_DIRECTORY, ctypes.addressof(answer))
+
+        # Assert
+        assert answer.value == b"/saves"
+
+    def test_the_system_directory_stays_the_system_directory(self):
+        # Arrange
+        session = libretro._Session(directory=b"/system", keep=None, options={}, saves=b"/saves")
+        answer = ctypes.c_char_p()
+
+        # Act
+        libretro._environment(session, libretro.ENV_GET_SYSTEM_DIRECTORY, ctypes.addressof(answer))
+
+        # Assert
+        assert answer.value == b"/system"

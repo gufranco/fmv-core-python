@@ -78,6 +78,7 @@ class _Session:
     directory: bytes
     keep: Collection[int] | None
     options: dict[bytes, bytes]
+    saves: bytes = b""
     defaults: dict[bytes, bytes] = field(default_factory=dict)
     held: Mapping[int, Collection[int]] = field(default_factory=dict)
     held_now: Collection[int] = frozenset()
@@ -96,6 +97,7 @@ def capture(
     keep: Collection[int] | None = None,
     options: Mapping[str, str] | None = None,
     held: Mapping[int, Collection[int]] | None = None,
+    save_dir: Path | None = None,
 ) -> list[tuple[int, Frame]]:
     if frames < 1:
         msg = f"a run needs at least one frame, got {frames}"
@@ -108,7 +110,11 @@ def capture(
         raise FileNotFoundError(msg)
     chosen = {key.encode(): value.encode() for key, value in (options or {}).items()}
     session = _Session(
-        directory=str(system_dir).encode(), keep=keep, options=chosen, held=held or {}
+        directory=str(system_dir).encode(),
+        saves=str(save_dir or system_dir).encode(),
+        keep=keep,
+        options=chosen,
+        held=held or {},
     )
     library = ctypes.CDLL(str(core))
     callbacks = _install(library, session)
@@ -209,6 +215,11 @@ def _directory(session: _Session, data: int) -> bool:
     return True
 
 
+def _saves(session: _Session, data: int) -> bool:
+    ctypes.cast(data, ctypes.POINTER(ctypes.c_char_p))[0] = session.saves or session.directory
+    return True
+
+
 def _pixel_format(session: _Session, data: int) -> bool:
     session.pixel_format = ctypes.cast(data, ctypes.POINTER(ctypes.c_int))[0]
     return session.pixel_format in (RGB1555, XRGB8888, RGB565)
@@ -262,7 +273,7 @@ def _declared(data: int) -> dict[bytes, bytes]:
 
 _HANDLERS: Final[dict[int, Callable[[_Session, int], bool]]] = {
     ENV_GET_SYSTEM_DIRECTORY: _directory,
-    ENV_GET_SAVE_DIRECTORY: _directory,
+    ENV_GET_SAVE_DIRECTORY: _saves,
     ENV_SET_PIXEL_FORMAT: _pixel_format,
     ENV_SET_VARIABLES: _set_variables,
     ENV_GET_VARIABLE: _variable,
