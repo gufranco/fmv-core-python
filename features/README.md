@@ -26,5 +26,5 @@ feature a console cannot carry says "Not possible" with the hardware reason.
 | A film inside your own game | Yes, `--bundle` emits a drop-in library | Yes, `--bundle` emits a drop-in library and `examples/cutscene` builds a game from it | Yes, `--bundle` with `--target gg` emits a Game Gear library |
 | A preview of what the console will draw | Yes, a video, or four frames beside their source | Yes, a video, or four frames beside their source | Yes, a video, or four frames beside their source |
 | A write-timing gate on every build | Yes | Yes | Yes |
-| A regression set of films baked on every test run | Yes, six films | Yes, six films | Planned: the six films are baked for the Master System only |
+| A regression set of films baked on every test run | Yes, six films | Yes, six films | Yes, the same six films baked into the Game Gear window |
 | Run on the original hardware | Yes, AES and MVS | Yes, a Master System and a Game Gear | Planned: the Master System cartridge has run on a Game Gear, the native one has not yet |
