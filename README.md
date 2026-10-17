@@ -3,7 +3,7 @@
 The Python code shared by two full-motion video players for consoles that were
 never meant to show film:
 [neogeo-media-player](https://github.com/gufranco/neogeo-media-player) for the Neo
-Geo and [sms-media-player](https://github.com/gufranco/sms-media-player) for
+Geo and [smsgg-media-player](https://github.com/gufranco/smsgg-media-player) for
 the Sega Master System. Each player bakes a film offline into data its console
 can replay, and everything in that bake that the hardware does not force lives
 here once.
