@@ -42,25 +42,39 @@ def bayer_thresholds(side: int) -> npt.NDArray[np.float32]:
     return np.tile(unit, (repeat, repeat)).astype(np.float32)
 
 
-def two_nearest(distance: npt.NDArray[np.floating], strength: float) -> tuple[Picks, Picks, Picks]:
+def two_nearest(
+    distance: npt.NDArray[np.floating],
+    spacing: npt.NDArray[np.floating],
+    strength: float,
+) -> tuple[Picks, Picks, Picks]:
     check_strength(strength)
     nearest = np.argmin(distance, axis=-1)
-    near_squared = np.take_along_axis(distance, nearest[..., None], axis=-1)[..., 0]
     if distance.shape[-1] < FEWEST_TO_MIX:
         zero = np.zeros(nearest.shape, dtype=np.uint8)
         return nearest.astype(np.uint8), nearest.astype(np.uint8), zero
     others = distance.copy()
     np.put_along_axis(others, nearest[..., None], np.inf, axis=-1)
     runner = np.argmin(others, axis=-1)
-    near = np.sqrt(near_squared)
-    far = np.sqrt(np.take_along_axis(others, runner[..., None], axis=-1)[..., 0])
-    total = near + far
-    share = np.divide(near, total, out=np.zeros_like(near), where=total > 0.0)
+    along = _along(distance, spacing, nearest, runner)
     return (
         nearest.astype(np.uint8),
         runner.astype(np.uint8),
-        np.rint(share * MIX_SCALE * strength).astype(np.uint8),
+        np.rint(along * MIX_SCALE * strength).astype(np.uint8),
     )
+
+
+def _along(
+    distance: npt.NDArray[np.floating],
+    spacing: npt.NDArray[np.floating],
+    nearest: npt.NDArray[np.intp],
+    runner: npt.NDArray[np.intp],
+) -> npt.NDArray[np.float64]:
+    near = np.take_along_axis(distance, nearest[..., None], axis=-1)[..., 0].astype(np.float64)
+    far = np.take_along_axis(distance, runner[..., None], axis=-1)[..., 0].astype(np.float64)
+    gap = spacing[nearest, runner].astype(np.float64)
+    twice = 2.0 * gap
+    along = np.divide(near + gap - far, twice, out=np.zeros_like(gap), where=gap > 0.0)
+    return np.clip(along, 0.0, 1.0)
 
 
 def mix(nearest: Picks, runner: Picks, share: Picks, threshold: npt.NDArray[np.float32]) -> Picks:

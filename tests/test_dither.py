@@ -9,10 +9,17 @@ SMS_TILE = 8
 NEOGEO_TILE = 16
 
 
+PAIR_SPACING = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.float32)
+
+
 def ramp_distance(pixels: int) -> np.ndarray:
     position = np.linspace(0.0, 1.0, pixels, dtype=np.float32)
     entries = np.array([0.0, 1.0], dtype=np.float32)
     return (position[:, None] - entries[None, :]) ** 2
+
+
+def spacing_of(points: np.ndarray) -> np.ndarray:
+    return ((points[:, None, :] - points[None, :, :]) ** 2).sum(axis=-1)
 
 
 class TestTheThresholdField:
@@ -77,9 +84,10 @@ class TestTwoNearest:
         rng = np.random.default_rng(7)
         base = rng.random((4096, 8), dtype=np.float32)
         distance = np.concatenate([base, base], axis=1)[:, rng.permutation(16)]
+        spacing = np.ones((16, 16), dtype=np.float32)
 
         # Act
-        nearest, _, _ = dither.two_nearest(distance, dither.MAX_DITHER)
+        nearest, _, _ = dither.two_nearest(distance, spacing, dither.MAX_DITHER)
 
         # Assert
         assert np.array_equal(nearest, np.argmin(distance, axis=1))
@@ -87,9 +95,10 @@ class TestTwoNearest:
     def test_the_runner_up_is_never_the_nearest(self):
         # Arrange
         distance = np.array([[1.0, 1.0, 5.0], [3.0, 1.0, 1.0]], dtype=np.float32)
+        spacing = np.ones((3, 3), dtype=np.float32)
 
         # Act
-        nearest, runner, _ = dither.two_nearest(distance, dither.MAX_DITHER)
+        nearest, runner, _ = dither.two_nearest(distance, spacing, dither.MAX_DITHER)
 
         # Assert
         assert (nearest.tolist(), runner.tolist()) == ([0, 1], [1, 2])
@@ -99,7 +108,7 @@ class TestTwoNearest:
         distance = np.array([[0.25, 0.25]], dtype=np.float32)
 
         # Act
-        _, _, share = dither.two_nearest(distance, dither.MAX_DITHER)
+        _, _, share = dither.two_nearest(distance, PAIR_SPACING, dither.MAX_DITHER)
 
         # Assert
         assert share.tolist() == [128]
@@ -109,17 +118,42 @@ class TestTwoNearest:
         distance = np.array([[0.0, 1.0]], dtype=np.float32)
 
         # Act
-        _, _, share = dither.two_nearest(distance, dither.MAX_DITHER)
+        _, _, share = dither.two_nearest(distance, PAIR_SPACING, dither.MAX_DITHER)
 
         # Assert
         assert share.tolist() == [0]
 
+    def test_a_colour_beyond_both_entries_is_never_mixed(self):
+        # Arrange
+        entries = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 3.0]], dtype=np.float32)
+        pixel = np.array([[-0.5, 0.0]], dtype=np.float32)
+        distance = ((pixel[:, None, :] - entries[None, :, :]) ** 2).sum(axis=-1)
+
+        # Act
+        _, _, share = dither.two_nearest(distance, spacing_of(entries), dither.MAX_DITHER)
+
+        # Assert
+        assert share.tolist() == [0]
+
+    def test_the_share_follows_the_colour_along_the_pair_and_not_its_distance(self):
+        # Arrange
+        entries = np.array([[0.0, 0.0], [1.0, 0.0]], dtype=np.float32)
+        pixel = np.array([[0.25, 0.5]], dtype=np.float32)
+        distance = ((pixel[:, None, :] - entries[None, :, :]) ** 2).sum(axis=-1)
+
+        # Act
+        _, _, share = dither.two_nearest(distance, spacing_of(entries), dither.MAX_DITHER)
+
+        # Assert
+        assert share.tolist() == [64]
+
     def test_leading_axes_are_kept(self):
         # Arrange
         distance = np.ones((3, 5, 4), dtype=np.float32)
+        spacing = np.ones((4, 4), dtype=np.float32)
 
         # Act
-        nearest, runner, share = dither.two_nearest(distance, dither.MAX_DITHER)
+        nearest, runner, share = dither.two_nearest(distance, spacing, dither.MAX_DITHER)
 
         # Assert
         assert (nearest.shape, runner.shape, share.shape) == ((3, 5), (3, 5), (3, 5))
@@ -127,9 +161,10 @@ class TestTwoNearest:
     def test_a_single_entry_has_no_runner_up_to_mix(self):
         # Arrange
         distance = np.array([[0.5], [2.0]], dtype=np.float32)
+        spacing = np.zeros((1, 1), dtype=np.float32)
 
         # Act
-        nearest, runner, share = dither.two_nearest(distance, dither.MAX_DITHER)
+        nearest, runner, share = dither.two_nearest(distance, spacing, dither.MAX_DITHER)
 
         # Assert
         assert (nearest.tolist(), runner.tolist(), share.tolist()) == ([0, 0], [0, 0], [0, 0])
@@ -138,7 +173,9 @@ class TestTwoNearest:
 class TestMix:
     def test_a_ramp_between_two_entries_uses_both(self):
         # Arrange
-        nearest, runner, share = dither.two_nearest(ramp_distance(64), dither.MAX_DITHER)
+        nearest, runner, share = dither.two_nearest(
+            ramp_distance(64), PAIR_SPACING, dither.MAX_DITHER
+        )
         threshold = dither.bayer_thresholds(SMS_TILE).reshape(-1)
 
         # Act
@@ -149,7 +186,9 @@ class TestMix:
 
     def test_more_of_the_far_end_lands_on_the_far_entry(self):
         # Arrange
-        nearest, runner, share = dither.two_nearest(ramp_distance(64), dither.MAX_DITHER)
+        nearest, runner, share = dither.two_nearest(
+            ramp_distance(64), PAIR_SPACING, dither.MAX_DITHER
+        )
         threshold = dither.bayer_thresholds(SMS_TILE).reshape(-1)
 
         # Act
@@ -161,7 +200,7 @@ class TestMix:
     def test_strength_zero_picks_the_nearest_everywhere(self):
         # Arrange
         distance = ramp_distance(64)
-        nearest, runner, share = dither.two_nearest(distance, dither.NO_DITHER)
+        nearest, runner, share = dither.two_nearest(distance, PAIR_SPACING, dither.NO_DITHER)
         threshold = dither.bayer_thresholds(SMS_TILE).reshape(-1)
 
         # Act
@@ -175,10 +214,10 @@ class TestMix:
         distance = ramp_distance(64)
         threshold = dither.bayer_thresholds(SMS_TILE).reshape(-1)
         plain = np.argmin(distance, axis=1)
-        half = dither.mix(*dither.two_nearest(distance, 0.5), threshold)
+        half = dither.mix(*dither.two_nearest(distance, PAIR_SPACING, 0.5), threshold)
 
         # Act
-        full = dither.mix(*dither.two_nearest(distance, dither.MAX_DITHER), threshold)
+        full = dither.mix(*dither.two_nearest(distance, PAIR_SPACING, dither.MAX_DITHER), threshold)
 
         # Assert
         assert 0 < int((half != plain).sum()) < int((full != plain).sum())
@@ -192,7 +231,7 @@ class TestStrength:
 
         # Act
         with pytest.raises(ValueError) as refused:
-            dither.two_nearest(distance, strength)
+            dither.two_nearest(distance, PAIR_SPACING, strength)
 
         # Assert
         assert str(refused.value) == f"a dither strength lies between 0 and 1, got {strength:g}"

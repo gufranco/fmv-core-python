@@ -245,9 +245,15 @@ runner-up for that share of a tile's pixels.
 
 The field depends only on a pixel's place inside its own tile, so two
 identical tiles still quantise alike and still intern as one, which error
-diffusion cannot offer. The share is the nearer radius over the sum of both,
-0 on an entry and a half when the two are equidistant, so a colour a palette
-holds is never moved. Every player draws through it; on the Game Gear it is
+diffusion cannot offer. The share is how far along the segment from the
+nearest entry to the runner-up the colour projects, from the three squared
+distances: 0 on an entry, a half midway, and 0 when the colour lies beyond
+the nearest entry, so a pair that does not bracket the colour never mixes
+and a colour a palette holds is never moved. The older share, the nearer
+radius over the sum of both, mixed in a runner-up of another hue whenever
+the two entries sat on the same side, which scattered wrong-hue pixels over
+saturated content; the projection measured better or level on every film
+of the Master System, Game Gear and Neo Geo sets. Every player draws through it; on the Game Gear it is
 what carries the dither past 32 palette entries.
 
 ## [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py)
