@@ -20,6 +20,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/clips.py`](fmvcore/clips.py) | Verifies a copy of a film against the identity its manifest publishes, saying whether it is a different film or an altered one |
 | [`fmvcore/fetch.py`](fmvcore/fetch.py) | Fetches a film to a partial file, retries transient failures, refuses an oversized or endless download, and keeps the file only once it verifies |
 | [`fmvcore/colour.py`](fmvcore/colour.py) | sRGB to Oklab, and the per-pixel and blurred Oklab errors a bake is scored by against one fixed reference |
+| [`fmvcore/dither.py`](fmvcore/dither.py) | The ordered dither between a palette's two nearest entries, on a tile-aligned 8x8 Bayer field |
 | [`fmvcore/writetiming.py`](fmvcore/writetiming.py) | The cheapest path in cycles between port writes across a whole program, for any processor a reader describes |
 | [`fmvcore/sdccz80.py`](fmvcore/sdccz80.py) | Reads SDCC Z80 listings for that walk, with the caller's port map |
 | [`fmvcore/m68kobjdump.py`](fmvcore/m68kobjdump.py) | Reads 68000 objdump disassembly for that walk, and measures the spacing between bus accesses |

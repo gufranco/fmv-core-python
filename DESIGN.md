@@ -236,6 +236,20 @@ It refuses frames of different shapes and a single frame without its batch
 axis, because either would broadcast into a plausible number that compares
 the wrong pixels.
 
+## [`fmvcore/dither.py`](fmvcore/dither.py)
+
+The ordered dither every player draws its pixels through: an 8x8 Bayer
+threshold field the size of a tile, the nearest palette entry with its
+runner-up and the share between them, and the mix that swaps in the
+runner-up for that share of a tile's pixels.
+
+The field depends only on a pixel's place inside its own tile, so two
+identical tiles still quantise alike and still intern as one, which error
+diffusion cannot offer. The share is the nearer radius over the sum of both,
+0 on an entry and a half when the two are equidistant, so a colour a palette
+holds is never moved. Every player draws through it; on the Game Gear it is
+what carries the dither past 32 palette entries.
+
 ## [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py)
 
 Drive ffmpeg to produce frames, and refuse every way a decode can go quietly
