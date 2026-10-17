@@ -27,4 +27,4 @@ feature a console cannot carry says "Not possible" with the hardware reason.
 | A preview of what the console will draw | Yes, a video, or four frames beside their source | Yes, a video, or four frames beside their source |
 | A write-timing gate on every build | Yes | Yes |
 | A regression set of films baked on every test run | Yes, six films | Yes, six films |
-| Run on the original hardware | Yes, AES and MVS | Not yet. A Game Gear run is pending |
+| Run on the original hardware | Yes, AES and MVS | Yes, a Master System and a Game Gear |
