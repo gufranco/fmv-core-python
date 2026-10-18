@@ -74,3 +74,37 @@ class TestParseArt:
 
         # Assert
         assert str(refused.value) == "glyphs.json must map glyph names to rows"
+
+
+class TestTheMenuColours:
+    def test_every_code_the_menu_art_draws_has_a_colour(self):
+        # Arrange
+        art = font.glyph_art()
+        drawn = {
+            code
+            for name in ("panel_top", "bar_filled", "bar_cap_left", "bar_knob")
+            for row in art[name]
+            for code in row
+        }
+
+        # Act
+        missing = drawn - set(font.MENU_COLOURS)
+
+        # Assert
+        assert missing == set()
+
+    def test_the_colours_are_the_menus_five_bit_triples(self):
+        # Arrange
+        expected = {
+            "#": (31, 31, 31),
+            ".": (1, 1, 3),
+            "*": (31, 18, 2),
+            "-": (13, 13, 15),
+            "=": (7, 7, 9),
+        }
+
+        # Act
+        colours = dict(font.MENU_COLOURS)
+
+        # Assert
+        assert colours == expected

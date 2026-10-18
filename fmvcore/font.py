@@ -8,7 +8,19 @@ from typing import Final
 RESOURCE: Final = "glyphs.json"
 SIZE: Final = 8
 INK: Final = "#"
+PANEL: Final = "."
+ACCENT: Final = "*"
+DIM: Final = "-"
+EDGE: Final = "="
 BLANK: Final = "blank"
+MENU_COLOURS: Final = {
+    INK: (31, 31, 31),
+    PANEL: (1, 1, 3),
+    ACCENT: (31, 18, 2),
+    DIM: (13, 13, 15),
+    EDGE: (7, 7, 9),
+}
+MENU_LEVELS: Final = 31
 PUNCTUATION: Final = {
     " ": "blank",
     ".": "dot",
