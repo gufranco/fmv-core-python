@@ -236,8 +236,11 @@ That choice has a price, paid deliberately:
   Oklab error is taken after it. A blur taken in Oklab reads a dither of black
   and a dark level as darker than it looks, and scored a flat grey of the wrong
   brightness above a correct dither in every dark scene measured on
-  2026-10-18. For the same reason a dither mixes two levels by their share of
-  light, never by their code values.
+  2026-10-18. For the same reason an ordered dither between two levels of a
+  colour channel takes each by its share of light, never by its code value.
+  The core's two-entry palette mix weighs by Oklab distance: weighing it by
+  light measured 0.3% to 1.6% worse on the Game Gear, because the entries it
+  mixes sit close together.
 - **Nothing aimed at a CRT.** A dither is allowed when it raises the picture's
   quality on a sharp screen. No composite model and no technique that needs a
   display to blend colours the console cannot show.
