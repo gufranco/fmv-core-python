@@ -226,11 +226,17 @@ its picture tests and the regression set accept.
 a picture with no dither. A dither moves pixels away from the source on
 purpose, so the per-pixel number always scores it as loss. `blurred_error`
 first runs the same separable 1, 4, 6, 4, 1 low-pass over both sides, edges
-extended, and then measures. A checkerboard of black and white then scores as
-the grey at its Oklab midpoint, which is what the eye makes of it. The
-family judges a dither by both numbers and by a rendered sheet, never by the
-blurred number alone, because two changes have won on it and looked worse on
-screen.
+extended, on linear light, then converts to Oklab and measures. Neighbouring
+pixels mix as light, so a checkerboard of black and white scores as the grey
+giving off half its light, sRGB 188, which is what the eye makes of it.
+
+Until 2026-10-18 the low-pass ran on Oklab values. Averaging cube roots reads a
+mix darker than its light, so a dither of black and a dark level scored as
+too dark, and in dark scenes a flat grey of the wrong brightness beat a
+correct dither: on the Game Gear's Sintel fade the right picture scored 0.041
+and grey blocks of a stale scene 0.016. The family judges a dither by both
+numbers and by a rendered sheet, never by the blurred number alone, because
+two changes have won on it and looked worse on screen.
 
 It refuses frames of different shapes and a single frame without its batch
 axis, because either would broadcast into a plausible number that compares

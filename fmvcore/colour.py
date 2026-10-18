@@ -32,14 +32,20 @@ def srgb_to_oklab(rgb: npt.NDArray[np.floating]) -> npt.NDArray[np.float32]:
     if rgb.shape[-1] != RGB_CHANNELS:
         msg = f"expected a trailing RGB axis, got shape {rgb.shape}"
         raise ValueError(msg)
+    return linear_to_oklab(srgb_to_linear(rgb))
+
+
+def srgb_to_linear(rgb: npt.NDArray[np.floating]) -> npt.NDArray[np.float64]:
     value = np.asarray(rgb, dtype=np.float64)
-    linear = np.where(
+    return np.where(
         value <= SRGB_LINEAR_LIMIT,
         value / 12.92,
         np.power((value + 0.055) / 1.055, 2.4),
     )
 
-    cones: npt.NDArray[np.float64] = linear @ TO_CONES.T
+
+def linear_to_oklab(linear: npt.NDArray[np.floating]) -> npt.NDArray[np.float32]:
+    cones: npt.NDArray[np.float64] = np.asarray(linear, dtype=np.float64) @ TO_CONES.T
     lab: npt.NDArray[np.float64] = np.cbrt(cones) @ TO_OKLAB.T
     return lab.astype(np.float32)
 
@@ -54,8 +60,8 @@ def blurred_error(shown: Frames, wanted: Frames) -> float:
     if shown.shape != wanted.shape or shown.ndim != FRAMES_NDIM:
         msg = f"cannot compare frames shaped {shown.shape} and {wanted.shape}"
         raise ValueError(msg)
-    a = _blurred(_oklab(shown))
-    b = _blurred(_oklab(wanted))
+    a = linear_to_oklab(_blurred(_light(shown)))
+    b = linear_to_oklab(_blurred(_light(wanted)))
     return float(np.sqrt(((a - b) ** 2).sum(-1)).mean())
 
 
@@ -63,10 +69,14 @@ def _oklab(frames: Frames) -> npt.NDArray[np.float32]:
     return srgb_to_oklab(frames.astype(np.float32) / BYTE_MAX)
 
 
-def _blurred(lab: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-    taps = np.array(BLUR_TAPS, dtype=np.float32) / sum(BLUR_TAPS)
+def _light(frames: Frames) -> npt.NDArray[np.float64]:
+    return srgb_to_linear(frames.astype(np.float64) / BYTE_MAX)
+
+
+def _blurred(light: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    taps = np.array(BLUR_TAPS, dtype=np.float64) / sum(BLUR_TAPS)
     reach = len(BLUR_TAPS) // 2
-    height, width = lab.shape[1], lab.shape[2]
-    padded = np.pad(lab, ((0, 0), (reach, reach), (reach, reach), (0, 0)), mode="edge")
+    height, width = light.shape[1], light.shape[2]
+    padded = np.pad(light, ((0, 0), (reach, reach), (reach, reach), (0, 0)), mode="edge")
     rows = sum(tap * padded[:, i : i + height] for i, tap in enumerate(taps))
     return np.asarray(sum(tap * rows[:, :, i : i + width] for i, tap in enumerate(taps)))

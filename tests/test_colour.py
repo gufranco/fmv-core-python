@@ -6,6 +6,7 @@ import pytest
 from fmvcore import colour
 
 OKLAB_MIDPOINT_GREY = 100
+HALF_LIGHT_GREY = 188
 GREY_40_TO_200_OKLAB = 0.5559456
 SIDE = 16
 
@@ -14,10 +15,10 @@ def flat(level: int, *, frames: int = 1) -> np.ndarray:
     return np.full((frames, SIDE, SIDE, 3), level, dtype=np.uint8)
 
 
-def against_grey(pattern: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def against_grey(pattern: np.ndarray, grey: int = HALF_LIGHT_GREY) -> tuple[np.ndarray, np.ndarray]:
     lit = np.where(pattern[..., None] == 0, 255, 0).astype(np.uint8)
     shown = np.broadcast_to(lit, (1, SIDE, SIDE, 3)).copy()
-    return shown, flat(OKLAB_MIDPOINT_GREY)
+    return shown, flat(grey)
 
 
 class TestSrgbToOklab:
@@ -96,7 +97,7 @@ class TestBlurredError:
         # Assert
         assert error == pytest.approx(GREY_40_TO_200_OKLAB, rel=1e-4)
 
-    def test_a_fine_checker_matches_the_grey_at_its_oklab_midpoint_once_blurred(self):
+    def test_a_fine_checker_matches_the_grey_giving_half_its_light_once_blurred(self):
         # Arrange
         rows, columns = np.mgrid[0:SIDE, 0:SIDE]
         shown, wanted = against_grey((rows + columns) % 2)
@@ -128,6 +129,19 @@ class TestBlurredError:
 
         # Assert
         assert error < colour.oklab_error(shown, wanted) / 4
+
+    def test_a_checker_is_closer_to_half_its_light_than_to_its_oklab_midpoint(self):
+        # Arrange
+        rows, columns = np.mgrid[0:SIDE, 0:SIDE]
+        checker = (rows + columns) % 2
+        shown, darker = against_grey(checker, OKLAB_MIDPOINT_GREY)
+        lighter = flat(HALF_LIGHT_GREY)
+
+        # Act
+        errors = (colour.blurred_error(shown, lighter), colour.blurred_error(shown, darker))
+
+        # Assert
+        assert errors[0] < errors[1] / 10
 
 
 class TestBlurredErrorRefusals:
