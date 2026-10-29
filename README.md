@@ -8,6 +8,11 @@ the Sega Master System and the Game Gear, each with its own cartridge. Each play
 can replay, and everything in that bake that the hardware does not force lives
 here once.
 
+[![ci](https://img.shields.io/github/actions/workflow/status/gufranco/fmv-core-python/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/gufranco/fmv-core-python/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/gufranco/fmv-core-python?style=flat-square&label=release)](https://github.com/gufranco/fmv-core-python/releases/latest)
+[![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen?style=flat-square)](https://github.com/gufranco/fmv-core-python/actions/workflows/ci.yml)
+[![license](https://img.shields.io/github/license/gufranco/fmv-core-python?style=flat-square&label=license)](LICENSE)
+
 The family's rules, and what belongs in the core versus a player, are in
 [FAMILY.md](FAMILY.md).
 
