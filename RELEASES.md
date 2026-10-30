@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/gufranco/fmv-core-python/compare/v1.0.0...v1.1.0) (2026-10-30)
+
+
+### Features
+
+* **condition:** shape audio before quantising ([cfbcb45](https://github.com/gufranco/fmv-core-python/commit/cfbcb45644fd7cfc04b4a2b95757dfdb43f28e15))
+
 # 1.0.0 (2026-10-23)
 
 
