@@ -262,6 +262,37 @@ saturated content; the projection measured better or level on every film
 of the Master System, Game Gear and Neo Geo sets. Every player draws through it; on the Game Gear it is
 what carries the dither past 32 palette entries.
 
+## [`fmvcore/condition.py`](fmvcore/condition.py)
+
+Shape a mono audio signal before a player quantises it, so a quiet source uses
+the output's full range and quiet passages survive a console speaker.
+
+Four stages, each switchable and every one off by default, so a default
+`Conditioning` is a pass-through and a player turns on only what its own
+measurement keeps. `condition` takes a float signal in [-1, 1] and returns one
+in [-1, 1]: a one-pole ~20 Hz high-pass that removes a DC offset wasting the
+range; a feed-forward compressor, 3:1 above -18 dBFS by default with a 5 ms
+attack and 150 ms release, that lifts quiet passages toward the loud ones; a
+make-up gain that puts a high percentile peak at a target below full scale, and
+leaves a signal under a floor untouched so it never amplifies silence into
+noise; and a soft clip that is identity below a knee and saturates into [-1, 1]
+above it. A final clamp holds the contract whatever the stages did.
+
+The order is fixed: remove the offset, even the dynamics, set the level, then
+tame what is left above the knee. The input contract is [-1, 1], so with every
+stage off the result equals the input, which is what keeps a bake byte-identical
+until a stage is turned on.
+
+`condition_int16` is the glue a player with int16 samples uses: it returns the
+samples unchanged when nothing is enabled, so the voice ROM is byte-identical
+to an unconditioned bake, and otherwise scales to [-1, 1], conditions, and
+rounds back with a clamp that cannot wrap.
+
+The stages come from the signal-processing intent, not from any one player.
+Each player measures which stages and strengths help its own output and against
+its own hardware before it turns any on; the core only holds the arithmetic and
+guarantees length, determinism and the range.
+
 ## [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py)
 
 Drive ffmpeg to produce frames, and refuse every way a decode can go quietly
