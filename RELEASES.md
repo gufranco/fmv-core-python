@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/gufranco/fmv-core-python/compare/v1.1.0...v1.2.0) (2026-11-02)
+
+
+### Features
+
+* **dither:** add pattern dither and linear blur ([06e7bc2](https://github.com/gufranco/fmv-core-python/commit/06e7bc2fd468431d1aa6e6a21d2b0fb80c25cda4))
+
 # [1.1.0](https://github.com/gufranco/fmv-core-python/compare/v1.0.0...v1.1.0) (2026-10-30)
 
 
