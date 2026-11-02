@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/gufranco/fmv-core-python/compare/v1.4.0...v1.4.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **video:** even enlargement, measured drift ([0254b56](https://github.com/gufranco/fmv-core-python/commit/0254b5669d7ae87412ffb10c8ce453c9f377b407))
+
 # [1.4.0](https://github.com/gufranco/fmv-core-python/compare/v1.3.0...v1.4.0) (2026-11-02)
 
 
