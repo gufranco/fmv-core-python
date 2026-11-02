@@ -370,8 +370,7 @@ through ffmpeg with a frame ceiling the caller sets. The remaining shared
 concerns move here one module at a time, each taking the better-tested of the
 two players' versions.
 
-Gaps against the family standard (as of 2026-10-17):
+Gaps against the family standard (as of 2026-11-02):
 
-- Coverage per file and the share of end-to-end tests have not yet been
-  measured against the 2026-10-17 requirement of 100% in every file and
-  end-to-end tests; CI enforces 95%.
+- Every file is at 100% of statements and branches, and CI enforces 100%.
+  The share of end-to-end tests has not been measured.

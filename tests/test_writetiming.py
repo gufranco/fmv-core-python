@@ -109,6 +109,18 @@ TAIL_JUMPS_IN_A_CIRCLE = """
     0000000D C9               [10]   15 \tret
 """
 
+CALLER_WRITING_AROUND_A_CALL = """
+    00000000                          7 _caller::
+    00000000 D3 BF            [11]    8 \tout\t(#0xBF), a
+    00000002 CDr00r00         [17]    9 \tcall\t_empty
+    00000005 D3 BF            [11]   10 \tout\t(#0xBF), a
+    00000007 C9               [10]   11 \tret
+"""
+
+LABEL_WITH_NO_CODE = """
+    00000000                          7 _empty::
+"""
+
 BRANCH_TO_THE_END = """
     00000000                          7 _leave::
     00000000 D3 BF            [11]    8 \tout\t(#0xBF), a
@@ -258,6 +270,16 @@ class TestPathsAcrossFunctions:
 
         # Assert
         assert [(g.source, g.cycles, g.to_source) for g in found] == [("caller", 21, "callee")]
+
+    def test_a_call_to_a_label_with_no_code_falls_through_to_the_next_write(self):
+        # Arrange
+        both = program(empty=LABEL_WITH_NO_CODE, caller=CALLER_WRITING_AROUND_A_CALL)
+
+        # Act
+        found = writetiming.gaps(both)
+
+        # Assert
+        assert [(g.source, g.cycles, g.to_source) for g in found] == [("caller", 28, "caller")]
 
     def test_a_tail_jump_out_of_the_listings_returns_to_the_caller(self):
         # Arrange

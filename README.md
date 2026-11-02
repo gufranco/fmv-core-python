@@ -10,7 +10,7 @@ here once.
 
 [![ci](https://img.shields.io/github/actions/workflow/status/gufranco/fmv-core-python/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/gufranco/fmv-core-python/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/gufranco/fmv-core-python?style=flat-square&label=release)](https://github.com/gufranco/fmv-core-python/releases/latest)
-[![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen?style=flat-square)](https://github.com/gufranco/fmv-core-python/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square)](https://github.com/gufranco/fmv-core-python/actions/workflows/ci.yml)
 [![license](https://img.shields.io/github/license/gufranco/fmv-core-python?style=flat-square&label=license)](LICENSE)
 
 The family's rules, and what belongs in the core versus a player, are in
@@ -79,7 +79,7 @@ make hooks
 uv run ruff format --check .
 uv run ruff check .
 uv run mypy fmvcore
-FMVCORE_FFMPEG_REQUIRED=1 FMVCORE_CC_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=95
+FMVCORE_FFMPEG_REQUIRED=1 FMVCORE_CC_REQUIRED=1 uv run python -m pytest --cov=fmvcore --cov-fail-under=100
 ```
 
 The pre-commit hook runs the same four gates. Tests that need ffmpeg skip

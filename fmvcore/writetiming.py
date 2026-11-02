@@ -84,29 +84,24 @@ class Program:
             if instruction.call in owners and index + 1 < len(listing.instructions)
         ]
 
-    def size(self) -> int:
-        return sum(len(listing.instructions) for listing in self.listings.values())
-
     def _tail_callers(self, function: str | None) -> set[str]:
-        found: set[str] = set()
-        pending = [function] if function else []
-        for _ in range(self.size() + 2):
-            if not pending:
+        if not function:
+            return set()
+        jumps = self._tail_jumps()
+        found = {function}
+        for _ in range(len({owner for _, owner in jumps})):
+            grown = found | {owner for jumped, owner in jumps if jumped in found}
+            if grown == found:
                 return found
-            name = pending.pop()
-            if name in found:
-                continue
-            found = {*found, name}
-            pending = [*pending, *self._jumping_to(name)]
-        msg = f"tail calls into {function} do not settle"
-        raise ValueError(msg)
+            found = grown
+        return found
 
-    def _jumping_to(self, name: str) -> list[str]:
+    def _tail_jumps(self) -> list[tuple[str, str]]:
         return [
-            owner
+            (instruction.jumped, owner)
             for listing in self.listings.values()
             for instruction, owner in zip(listing.instructions, listing.owners, strict=True)
-            if owner is not None and instruction.jumped == name
+            if owner is not None and instruction.jumped is not None
         ]
 
 

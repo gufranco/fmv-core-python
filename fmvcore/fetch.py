@@ -56,16 +56,15 @@ def downloader(user_agent: str, *, chunk: int = CHUNK, max_blocks: int = MAX_BLO
 
 
 def fetch(url: str, target: Path, limit: int | None, *, download: Download, wait: Wait) -> None:
-    for attempt in range(1, ATTEMPTS + 1):
+    for attempt in range(1, ATTEMPTS):
         try:
             download(url, target, limit)
         except TRANSIENT as error:
-            if attempt == ATTEMPTS:
-                raise
             logger.warning("%s: %r; retrying, attempt %d of %d", url, error, attempt + 1, ATTEMPTS)
             wait(BACKOFF_SECONDS * attempt)
         else:
             return
+    download(url, target, limit)
 
 
 def acquire(

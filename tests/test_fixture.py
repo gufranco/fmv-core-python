@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import runpy
+import sys
 
 import numpy as np
 import pytest
@@ -112,6 +114,18 @@ class TestTheClipIsReproducible:
 
         # Assert
         assert (code, f"wrote {target}" in capsys.readouterr().out) == (0, True)
+
+    def test_running_the_module_writes_the_clip_and_exits_zero(self, tmp_path, monkeypatch):
+        # Arrange
+        target = tmp_path / "fixture.mp4"
+        monkeypatch.setattr(sys, "argv", ["fixture", str(target)])
+
+        # Act
+        with pytest.raises(SystemExit) as exited:
+            runpy.run_path(fixture.__file__, run_name="__main__")
+
+        # Assert
+        assert (exited.value.code, target.is_file()) == (0, True)
 
 
 class TestAFailingEncoder:

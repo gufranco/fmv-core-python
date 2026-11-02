@@ -13,7 +13,7 @@ GATES = Gates(
         Check("format", (*UV, "ruff", "format", "--check", ".")),
         Check("lint", (*UV, "ruff", "check", ".")),
         Check("types", (*UV, "mypy", "fmvcore")),
-        Check("tests", (*UV, "python", "-m", "pytest", "--cov=fmvcore", "--cov-fail-under=95")),
+        Check("tests", (*UV, "python", "-m", "pytest", "--cov=fmvcore", "--cov-fail-under=100")),
     ),
     always_required={"FMVCORE_FFMPEG_REQUIRED": "1", "FMVCORE_CC_REQUIRED": "1"},
 )

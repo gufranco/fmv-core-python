@@ -93,4 +93,4 @@ jobs:
           uv run python -m pytest
           --cov=fmvcore
           --cov-report=term-missing
-          --cov-fail-under=95
+          --cov-fail-under=100

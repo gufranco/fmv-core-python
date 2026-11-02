@@ -56,6 +56,19 @@ class TestAlignment:
         # Assert
         assert found.mismatches == found.sampled
 
+    def test_a_capture_longer_than_the_search_window_tries_every_offset(self):
+        # Arrange
+        fields = film(12)
+        blank = np.zeros((2, HEIGHT, WIDTH, 3), dtype=np.uint8)
+        tail = np.zeros((capture.ALIGN_SEARCH + 12, HEIGHT, WIDTH, 3), dtype=np.uint8)
+        recorded = np.concatenate([blank, fields, tail])
+
+        # Act
+        found = capture.align(recorded, fields)
+
+        # Assert
+        assert found == capture.Alignment(offset=2, mismatches=0, sampled=11)
+
 
 class TestMixing:
     def test_a_clean_transfer_mixes_nothing(self):

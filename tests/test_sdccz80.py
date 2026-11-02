@@ -185,6 +185,21 @@ class TestBranches:
         # Assert
         assert (jump.cycles, jump.fall_cycles) == (12, 7)
 
+    def test_a_counted_jump_is_conditional_and_costs_eight_on_its_last_pass(self):
+        # Arrange
+        text = "    00000010 10 FE            [13]    2 \tdjnz\t00090$\n"
+
+        # Act
+        jump = read(text).instructions[0]
+
+        # Assert
+        assert (jump.conditional, jump.leaves, jump.cycles, jump.fall_cycles) == (
+            True,
+            False,
+            13,
+            8,
+        )
+
     def test_an_uppercase_condition_is_a_condition(self):
         # Arrange
         text = "    00000002 20 FC            [12]   10 \tjr\tNZ, 00101$\n"

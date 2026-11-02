@@ -8,7 +8,7 @@ import tempfile
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import IO, Final
+from typing import IO, Final, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -123,15 +123,13 @@ def stream_frames(
     stride = shape[0] * shape[1] * shape[2]
     with tempfile.TemporaryFile() as errors:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors)
-        if process.stdout is None:
-            msg = "ffmpeg produced no output stream"
-            raise RuntimeError(msg)
+        output = cast("IO[bytes]", process.stdout)
         try:
             leftover = yield from _whole_frames(
-                process.stdout, path=path, shape=shape, max_frames=max_frames
+                output, path=path, shape=shape, max_frames=max_frames
             )
         finally:
-            process.stdout.close()
+            output.close()
             code = process.wait()
             errors.seek(0)
             complaint = errors.read().decode(errors="replace").strip()
