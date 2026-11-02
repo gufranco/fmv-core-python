@@ -60,9 +60,16 @@ def blurred_error(shown: Frames, wanted: Frames) -> float:
     if shown.shape != wanted.shape or shown.ndim != FRAMES_NDIM:
         msg = f"cannot compare frames shaped {shown.shape} and {wanted.shape}"
         raise ValueError(msg)
-    a = linear_to_oklab(_blurred(_light(shown)))
-    b = linear_to_oklab(_blurred(_light(wanted)))
+    a = blurred_oklab(_light(shown))
+    b = blurred_oklab(_light(wanted))
     return float(np.sqrt(((a - b) ** 2).sum(-1)).mean())
+
+
+def blurred_oklab(light: npt.NDArray[np.floating]) -> npt.NDArray[np.float32]:
+    if light.ndim != FRAMES_NDIM or light.shape[-1] != RGB_CHANNELS:
+        msg = f"expected frames of linear RGB, got shape {light.shape}"
+        raise ValueError(msg)
+    return linear_to_oklab(_blurred(np.asarray(light, dtype=np.float64)))
 
 
 def _oklab(frames: Frames) -> npt.NDArray[np.float32]:

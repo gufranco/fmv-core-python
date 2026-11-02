@@ -242,6 +242,13 @@ It refuses frames of different shapes and a single frame without its batch
 axis, because either would broadcast into a plausible number that compares
 the wrong pixels.
 
+`blurred_oklab` is that low-pass and conversion on its own, for a caller that
+already holds linear light and compares many small pictures at once. The
+Master System player uses it to choose each cell's palette by how the drawn
+cell looks once blurred, scoring every cell of a frame as a batch of 8 by 8
+frames. It refuses anything but frames of three channels, for the same reason
+`blurred_error` does.
+
 ## [`fmvcore/dither.py`](fmvcore/dither.py)
 
 The ordered dither every player draws its pixels through: an 8x8 Bayer
@@ -261,6 +268,23 @@ the two entries sat on the same side, which scattered wrong-hue pixels over
 saturated content; the projection measured better or level on every film
 of the Master System, Game Gear and Neo Geo sets. Every player draws through it; on the Game Gear it is
 what carries the dither past 32 palette entries.
+
+`pattern_candidates` and `pattern_pick` are the second palette dither, after
+Thomas Knoll's pattern dither. For each colour it picks a nearest entry, adds
+up what that pick missed by, picks again for the colour plus that error, and
+keeps four picks, darkest first; the threshold field then chooses a pick by
+its rank. Four picks can mix three or four entries, so a colour that no pair
+of entries brackets is still drawn close on average. The picks depend only on
+the colour and the palette, so a player can build them once per palette and
+look them up, and identical tiles still quantise alike.
+
+The error is added up in Oklab: adding it up in linear light measured 0.2%
+worse on the Neo Geo set. Sixteen picks measured 2.1% to 9.1% better than no
+dither there and took six to ten times the bake time, so four is the default.
+Four picks beat no dither on all six Neo Geo films, by 0.2% to 6.0%, where
+the two-entry mix tied, and cost about 1.2% more C-ROM tiles. On the Master
+System and the Game Gear every form lost or split against the two-entry mix,
+so those players keep `two_nearest` and `mix`.
 
 ## [`fmvcore/condition.py`](fmvcore/condition.py)
 

@@ -235,3 +235,109 @@ class TestStrength:
 
         # Assert
         assert str(refused.value) == f"a dither strength lies between 0 and 1, got {strength:g}"
+
+
+LINE = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+TRIANGLE = np.array([[0.2, 0.0, 0.0], [0.8, 0.3, 0.0], [0.8, -0.3, 0.0]])
+
+
+class TestPatternCandidates:
+    def test_a_colour_on_an_entry_draws_only_that_entry(self):
+        # Arrange
+        point = LINE[1][None, :]
+
+        # Act
+        candidates = dither.pattern_candidates(point, LINE, strength=1.0)
+
+        # Assert
+        assert candidates.tolist() == [[1, 1, 1, 1]]
+
+    def test_a_colour_midway_between_two_entries_draws_each_half_the_time(self):
+        # Arrange
+        point = np.array([[0.5, 0.0, 0.0]])
+
+        # Act
+        candidates = dither.pattern_candidates(point, LINE, strength=1.0)
+
+        # Assert
+        assert candidates.tolist() == [[0, 0, 1, 1]]
+
+    def test_candidates_come_darkest_first(self):
+        # Arrange
+        point = np.array([[0.3, 0.0, 0.0]])
+
+        # Act
+        candidates = dither.pattern_candidates(point, LINE, strength=1.0)
+
+        # Assert
+        assert candidates[0].tolist() == sorted(candidates[0].tolist())
+
+    def test_no_strength_draws_the_nearest_entry_every_time(self):
+        # Arrange
+        point = np.array([[0.3, 0.0, 0.0]])
+
+        # Act
+        candidates = dither.pattern_candidates(point, LINE, strength=0.0)
+
+        # Assert
+        assert candidates.tolist() == [[0, 0, 0, 0]]
+
+    def test_a_colour_off_every_pair_is_drawn_closer_than_the_two_entry_mix_draws_it(self):
+        # Arrange
+        point = TRIANGLE.mean(axis=0)
+        field = dither.bayer_thresholds(SMS_TILE).reshape(-1)
+        distance = ((point[None, :] - TRIANGLE) ** 2).sum(axis=-1)[None, :].repeat(field.size, 0)
+        nearest, runner, share = dither.two_nearest(distance, spacing_of(TRIANGLE), 1.0)
+        mixed = TRIANGLE[dither.mix(nearest, runner, share, field)].mean(axis=0)
+
+        # Act
+        candidates = dither.pattern_candidates(point[None, :], TRIANGLE, strength=1.0, count=16)
+
+        # Assert
+        drawn = TRIANGLE[candidates[0]].mean(axis=0)
+        assert np.linalg.norm(drawn - point) < np.linalg.norm(mixed - point)
+
+    def test_asking_for_no_candidates_is_refused(self):
+        # Arrange
+        point = np.array([[0.3, 0.0, 0.0]])
+
+        # Act
+        with pytest.raises(ValueError) as refused:
+            dither.pattern_candidates(point, LINE, strength=1.0, count=0)
+
+        # Assert
+        assert str(refused.value) == "a pattern needs at least one candidate, got 0"
+
+    def test_a_strength_outside_the_range_is_refused(self):
+        # Arrange
+        point = np.array([[0.3, 0.0, 0.0]])
+
+        # Act
+        with pytest.raises(ValueError) as refused:
+            dither.pattern_candidates(point, LINE, strength=1.5)
+
+        # Assert
+        assert str(refused.value) == "a dither strength lies between 0 and 1, got 1.5"
+
+
+class TestPatternPick:
+    def test_the_threshold_picks_the_candidate_of_its_rank(self):
+        # Arrange
+        candidates = np.array([[5, 6, 7, 8]] * 4, dtype=np.uint8)
+        threshold = np.array([0.1, 0.3, 0.6, 0.9], dtype=np.float32)
+
+        # Act
+        picked = dither.pattern_pick(candidates, threshold)
+
+        # Assert
+        assert picked.tolist() == [5, 6, 7, 8]
+
+    def test_leading_axes_are_kept(self):
+        # Arrange
+        candidates = np.zeros((3, 64, 4), dtype=np.uint8)
+
+        # Act
+        picked = dither.pattern_pick(candidates, dither.bayer_thresholds(SMS_TILE).reshape(-1))
+
+        # Assert
+        assert picked.shape == (3, 64)

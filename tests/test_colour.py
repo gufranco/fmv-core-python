@@ -76,6 +76,31 @@ class TestOklabError:
         assert error == pytest.approx(1.0, abs=1e-3)
 
 
+class TestBlurredOklab:
+    def test_a_fine_checker_of_full_and_no_light_blurs_to_half_light(self):
+        # Arrange
+        rows, columns = np.mgrid[0:SIDE, 0:SIDE]
+        light = np.repeat(((rows + columns) % 2).astype(np.float64)[None, ..., None], 3, axis=3)
+        half = colour.linear_to_oklab(np.full(3, 0.5))
+
+        # Act
+        blurred = colour.blurred_oklab(light)
+
+        # Assert
+        assert np.allclose(blurred[0, 4:12, 4:12], half, atol=0.02)
+
+    def test_a_single_frame_without_a_frame_axis_is_refused(self):
+        # Arrange
+        light = np.zeros((SIDE, SIDE, 3))
+
+        # Act
+        with pytest.raises(ValueError) as refused:
+            colour.blurred_oklab(light)
+
+        # Assert
+        assert str(refused.value) == f"expected frames of linear RGB, got shape {light.shape}"
+
+
 class TestBlurredError:
     def test_identical_frames_have_no_blurred_error(self):
         # Arrange

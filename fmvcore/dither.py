@@ -10,6 +10,7 @@ MAX_DITHER: Final = 1.0
 MIX_SCALE: Final = 255.0
 BAYER_SIDE: Final = 8
 FEWEST_TO_MIX: Final = 2
+PATTERN_CANDIDATES: Final = 4
 _BAYER_8: Final = np.array(
     [
         [0, 32, 8, 40, 2, 34, 10, 42],
@@ -79,3 +80,35 @@ def _along(
 
 def mix(nearest: Picks, runner: Picks, share: Picks, threshold: npt.NDArray[np.float32]) -> Picks:
     return np.where(share > threshold * MIX_SCALE, runner, nearest).astype(np.uint8)
+
+
+def pattern_candidates(
+    points: npt.NDArray[np.floating],
+    entries: npt.NDArray[np.floating],
+    *,
+    strength: float,
+    count: int = PATTERN_CANDIDATES,
+) -> Picks:
+    check_strength(strength)
+    if count < 1:
+        msg = f"a pattern needs at least one candidate, got {count}"
+        raise ValueError(msg)
+    base = np.asarray(points, dtype=np.float64)
+    table = np.asarray(entries, dtype=np.float64)
+    error = np.zeros_like(base)
+    picks: list[npt.NDArray[np.intp]] = []
+    for _ in range(count):
+        target = base + strength * error
+        pick = np.argmin(((target[..., None, :] - table) ** 2).sum(axis=-1), axis=-1)
+        picks = [*picks, pick]
+        error = error + (base - table[pick])
+    stacked = np.stack(picks, axis=-1)
+    order = np.argsort(table[:, 0][stacked], axis=-1, kind="stable")
+    return np.take_along_axis(stacked, order, axis=-1).astype(np.uint8)
+
+
+def pattern_pick(candidates: Picks, threshold: npt.NDArray[np.float32]) -> Picks:
+    count = candidates.shape[-1]
+    rank = np.minimum((threshold * count).astype(np.intp), count - 1)
+    wanted = np.broadcast_to(rank[..., None], (*candidates.shape[:-1], 1))
+    return np.take_along_axis(candidates, wanted, axis=-1)[..., 0]
