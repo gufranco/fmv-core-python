@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/gufranco/fmv-core-python/compare/v1.2.0...v1.3.0) (2026-11-02)
+
+
+### Features
+
+* **dither:** draw sixteen pattern picks ([3e9f41c](https://github.com/gufranco/fmv-core-python/commit/3e9f41c38af929200a9dabb28c7e140c54655d50))
+
 # [1.2.0](https://github.com/gufranco/fmv-core-python/compare/v1.1.0...v1.2.0) (2026-11-02)
 
 
