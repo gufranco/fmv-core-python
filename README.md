@@ -34,6 +34,7 @@ The family's rules, and what belongs in the core versus a player, are in
 | [`fmvcore/hook.py`](fmvcore/hook.py) | The pre-commit body every member runs: its checks always, its player checks when a player path is staged |
 | [`fmvcore/fixture.py`](fmvcore/fixture.py) | Builds the synthetic clip every member's regression set runs, committed as [`fixtures/synthetic.mp4`](fixtures/synthetic.mp4) |
 | [`fmvcore/ffmpeg.py`](fmvcore/ffmpeg.py) | Probes a source, builds the ffmpeg command for a filter chain, and streams whole RGB frames with a ceiling, refusing a failed decoder or a torn final frame |
+| [`fmvcore/video.py`](fmvcore/video.py) | Writes a preview video every phone and computer plays, near-lossless H.264 at a whole-number enlargement, or lossless FFV1 in Matroska, and checks a written file decodes back within 5 levels of the console picture |
 | [`fmvcore/source.py`](fmvcore/source.py) | Finds black bars baked into a source and whether it is interlaced, before the picture is scaled |
 | [`fmvcore/subtitles.py`](fmvcore/subtitles.py) | Parses SubRip files, trims overlapping cues, finds the cue at a moment and wraps text to a column count |
 | [`fmvcore/font.py`](fmvcore/font.py) | The 8x8 glyph art in [`fmvcore/glyphs.json`](fmvcore/glyphs.json) both players draw text with |

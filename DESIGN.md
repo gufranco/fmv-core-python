@@ -346,6 +346,31 @@ video stream, a zero or infinite duration, a non-positive frame rate or a
 rate of `0/0`. Each refusal names the file, because a bake usually walks
 several.
 
+## [`fmvcore/video.py`](fmvcore/video.py)
+
+Write the preview video a person judges a bake by, in a form every player
+opens without blurring what is being judged.
+
+A console picture at its own size through H.264's 4:2:0 colour halves the
+colour resolution, so every dither dot and every tile edge smears into its
+neighbour: the very detail a preview exists to show. No lossless codec plays
+on Windows, Android, an iPhone and macOS alike. Lossless H.264 needs the High
+4:4:4 Predictive profile, which only Apple's players decode. So an `.mp4` is
+the closest to lossless that the High profile allows: each console pixel
+enlarged a whole number of times with nearest neighbour, so it fills whole
+4:2:0 colour blocks, then x264 at quantizer 1 with deblocking, psychovisual
+tuning and adaptive quantisation off, tagged BT.709 limited range, at a
+level no higher than 5.1. The enlargement is the largest up to 8 that level
+5.1 holds at the picture's rate: 8 for the Master System's 256 by 192 at
+59.92 frames a second, 7 for the Neo Geo's 320 by 224 at 59.19.
+
+`check` holds a written file to that: ffprobe must read `h264`, `High`,
+`yuv420p`, BT.709, limited range and level 5.1 or lower, and the frames
+decoded back at the console's size must sit within 5 of 255 levels of the
+frames that went in. A `.mkv` is FFV1 on RGB at the console's size, lossless
+and checked by construction, for when every level matters more than which
+player opens it.
+
 ## [`fmvcore/hook.py`](fmvcore/hook.py)
 
 Run a member's pre-commit checks and refuse the commit when one fails.
