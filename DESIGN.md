@@ -272,17 +272,21 @@ what carries the dither past 32 palette entries.
 `pattern_candidates` and `pattern_pick` are the second palette dither, after
 Thomas Knoll's pattern dither. For each colour it picks a nearest entry, adds
 up what that pick missed by, picks again for the colour plus that error, and
-keeps four picks, darkest first; the threshold field then chooses a pick by
-its rank. Four picks can mix three or four entries, so a colour that no pair
-of entries brackets is still drawn close on average. The picks depend only on
+keeps sixteen picks, darkest first; the threshold field then chooses a pick
+by its rank. The picks can mix three or more entries, so a colour that no
+pair of entries brackets is still drawn close on average. The picks depend only on
 the colour and the palette, so a player can build them once per palette and
 look them up, and identical tiles still quantise alike.
 
 The error is added up in Oklab: adding it up in linear light measured 0.2%
-worse on the Neo Geo set. Sixteen picks measured 2.1% to 9.1% better than no
-dither there and took six to ten times the bake time, so four is the default.
-Four picks beat no dither on all six Neo Geo films, by 0.2% to 6.0%, where
-the two-entry mix tied, and cost about 1.2% more C-ROM tiles. On the Master
+worse on the Neo Geo set. On its six films, against no dither, the
+two-entry mix tied, four picks measured 0.2% to 6.0% lower blurred error for
+about 1.2% more C-ROM tiles, and sixteen picks 2.1% to 9.1% lower for 1.4% to
+7.8% more tiles, 1.6% to 3.8% below four picks on every film. Per tile spent,
+sixteen picks beat a finer quality rung on four films of six and sat near it
+on the other two. Sixteen take three times the bake time of four, and the
+family's defaults are the best picture whatever the bake time, so sixteen is
+the default. On the Master
 System and the Game Gear every form lost or split against the two-entry mix,
 so those players keep `two_nearest` and `mix`.
 

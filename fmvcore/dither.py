@@ -10,7 +10,7 @@ MAX_DITHER: Final = 1.0
 MIX_SCALE: Final = 255.0
 BAYER_SIDE: Final = 8
 FEWEST_TO_MIX: Final = 2
-PATTERN_CANDIDATES: Final = 4
+PATTERN_CANDIDATES: Final = 16
 _BAYER_8: Final = np.array(
     [
         [0, 32, 8, 40, 2, 34, 10, 42],

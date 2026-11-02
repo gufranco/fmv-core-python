@@ -250,7 +250,7 @@ class TestPatternCandidates:
         candidates = dither.pattern_candidates(point, LINE, strength=1.0)
 
         # Assert
-        assert candidates.tolist() == [[1, 1, 1, 1]]
+        assert candidates.tolist() == [[1] * 16]
 
     def test_a_colour_midway_between_two_entries_draws_each_half_the_time(self):
         # Arrange
@@ -260,7 +260,7 @@ class TestPatternCandidates:
         candidates = dither.pattern_candidates(point, LINE, strength=1.0)
 
         # Assert
-        assert candidates.tolist() == [[0, 0, 1, 1]]
+        assert candidates.tolist() == [[0] * 8 + [1] * 8]
 
     def test_candidates_come_darkest_first(self):
         # Arrange
@@ -280,7 +280,7 @@ class TestPatternCandidates:
         candidates = dither.pattern_candidates(point, LINE, strength=0.0)
 
         # Assert
-        assert candidates.tolist() == [[0, 0, 0, 0]]
+        assert candidates.tolist() == [[0] * 16]
 
     def test_a_colour_off_every_pair_is_drawn_closer_than_the_two_entry_mix_draws_it(self):
         # Arrange

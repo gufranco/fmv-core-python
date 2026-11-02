@@ -80,6 +80,10 @@ the requirement.
   colours and sound, never the mode the weaker console imposes.
 - **Perceived picture quality comes before frame rate.** When the two compete
   for bytes, slots or cycles, the picture wins.
+- **Every default is the best picture.** Owner's instruction, 2026-11-02: a
+  baker's default for every setting that changes the picture is the one that
+  measured best on the blurred error and on the sheets. Bake time is never a
+  reason to default to less; a faster setting stays available as a flag.
 - **Sound, the way the console can play it, with no added hardware.** Every
   player carries the film's sound using only what the stock console and a
   standard cartridge provide.
@@ -240,9 +244,9 @@ That choice has a price, paid deliberately:
   colour channel takes each by its share of light, never by its code value.
   The core's two-entry palette mix weighs by Oklab distance: weighing it by
   light measured 0.3% to 1.6% worse on the Game Gear, because the entries it
-  mixes sit close together. The Neo Geo draws its opt-in dither through the
-  core's four-pick pattern dither instead, which beat the two-entry mix on
-  all six of its films; on the Master System and the Game Gear it lost or
+  mixes sit close together. The Neo Geo draws its dither through the core's
+  sixteen-pick pattern dither instead, which beat the two-entry mix and four
+  picks on all six of its films; on the Master System and the Game Gear it lost or
   split in every form measured, so they keep the two-entry mix.
 - **Nothing aimed at a CRT.** A dither is allowed when it raises the picture's
   quality on a sharp screen. No composite model and no technique that needs a
