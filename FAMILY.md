@@ -296,9 +296,10 @@ That choice has a price, paid deliberately:
   that stream once a headless capture has matched it pixel for pixel
   outside the player's overlay. It is never a render of the baker's preview.
 - **A preview video plays everywhere and keeps every pixel.** A baker's
-  `.mp4` preview goes through `fmvcore.video`: near-lossless H.264 High at a
-  whole-number nearest-neighbour enlargement, checked to decode back within
-  5 levels of the console picture; a `.mkv` is lossless FFV1.
+  `.mp4` preview goes through `fmvcore.video`: near-lossless H.264 High at an
+  even nearest-neighbour enlargement, checked to decode back within the bound
+  measured over the console's whole colour set, 5 levels unless a player
+  measured more; a `.mkv` is lossless FFV1.
 - **A player's demos match frame for frame.** When a player carries more
   than one console, every console's demo is baked from the same window of
   the demo film with the same settings, drawn the same way and cut to the

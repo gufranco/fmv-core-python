@@ -1,4 +1,5 @@
 import subprocess
+from dataclasses import replace
 from fractions import Fraction
 
 import numpy as np
@@ -40,7 +41,7 @@ class TestEnlargement:
         # Assert
         assert factor == 8
 
-    def test_a_neo_geo_picture_takes_the_largest_level_five_one_holds(self):
+    def test_a_neo_geo_picture_takes_the_largest_even_factor_level_five_one_holds(self):
         # Arrange
         picture = NEO_GEO
 
@@ -48,7 +49,7 @@ class TestEnlargement:
         factor = video.enlargement(picture)
 
         # Assert
-        assert factor == 7
+        assert factor == 6
 
     def test_a_picture_too_large_for_the_level_is_refused(self):
         # Arrange
@@ -71,6 +72,20 @@ class TestNearLosslessVideo:
 
         # Act
         checked = video.check(path, SMALL, frames)
+
+        # Assert
+        assert checked is None
+
+    def test_random_colours_at_the_neo_geo_enlargement_stay_within_seven_levels(self, tmp_path):
+        # Arrange
+        path = tmp_path / "neo.mp4"
+        generator = np.random.default_rng(SEED)
+        frames = list(generator.integers(0, 256, size=(2, 224, 320, 3), dtype=np.uint8))
+        picture = replace(NEO_GEO, most_drift=7)
+        encode(path, picture, frames)
+
+        # Act
+        checked = video.check(path, picture, frames)
 
         # Assert
         assert checked is None

@@ -17,6 +17,7 @@ from fmvcore import ffmpeg
 LOSSLESS_SUFFIXES: Final = frozenset({".mkv"})
 MOST_ENLARGEMENT: Final = 8
 MACROBLOCK: Final = 16
+CHROMA_BLOCK: Final = 2
 LEVEL_FRAME_BLOCKS: Final = 36_864
 LEVEL_BLOCK_RATE: Final = 983_040
 HIGHEST_LEVEL: Final = 51
@@ -63,16 +64,17 @@ class Picture:
     width: int
     height: int
     rate: Fraction
+    most_drift: int = MOST_DRIFT
 
 
 def enlargement(picture: Picture) -> int:
-    for factor in range(MOST_ENLARGEMENT, 0, -1):
+    for factor in range(MOST_ENLARGEMENT, 0, -CHROMA_BLOCK):
         across = math.ceil(picture.width * factor / MACROBLOCK)
         down = math.ceil(picture.height * factor / MACROBLOCK)
         blocks = across * down
         if blocks <= LEVEL_FRAME_BLOCKS and blocks * picture.rate <= LEVEL_BLOCK_RATE:
             return factor
-    msg = f"a {picture.width}x{picture.height} picture does not fit H.264 level 5.1 at 1x"
+    msg = f"a {picture.width}x{picture.height} picture does not fit H.264 level 5.1 at 2x"
     raise ValueError(msg)
 
 
@@ -121,8 +123,8 @@ def check(path: Path, picture: Picture, frames: Sequence[npt.NDArray[np.uint8]])
         int(np.abs(shown.astype(np.int16) - wanted.astype(np.int16)).max())
         for shown, wanted in zip(decoded, frames, strict=True)
     )
-    if drift > MOST_DRIFT:
-        msg = f"{path} drifts {drift} levels from the console picture, past {MOST_DRIFT}"
+    if drift > picture.most_drift:
+        msg = f"{path} drifts {drift} levels from the console picture, past {picture.most_drift}"
         raise ValueError(msg)
 
 

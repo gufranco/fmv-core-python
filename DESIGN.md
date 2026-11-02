@@ -360,14 +360,19 @@ the closest to lossless that the High profile allows: each console pixel
 enlarged a whole number of times with nearest neighbour, so it fills whole
 4:2:0 colour blocks, then x264 at quantizer 1 with deblocking, psychovisual
 tuning and adaptive quantisation off, tagged BT.709 limited range, at a
-level no higher than 5.1. The enlargement is the largest up to 8 that level
-5.1 holds at the picture's rate: 8 for the Master System's 256 by 192 at
-59.92 frames a second, 7 for the Neo Geo's 320 by 224 at 59.19.
+level no higher than 5.1. The enlargement is even, so a console pixel covers
+whole 2 by 2 colour blocks and never shares one with its neighbour, and it
+is the largest up to 8 that level 5.1 holds at the picture's rate: 8 for the
+Master System's 256 by 192 at 59.92 frames a second, 6 for the Neo Geo's 320
+by 224 at 59.19.
 
 `check` holds a written file to that: ffprobe must read `h264`, `High`,
 `yuv420p`, BT.709, limited range and level 5.1 or lower, and the frames
 decoded back at the console's size must sit within 5 of 255 levels of the
-frames that went in. A `.mkv` is FFV1 on RGB at the console's size, lossless
+frames that went in, or the bound a player measured for its colours,
+`Picture.most_drift`. Every colour the Master System and the Game Gear can
+show, packed with shuffled neighbours, comes back within 4 levels; the Neo
+Geo's 65,536 come back within 6, so its player allows 7. A `.mkv` is FFV1 on RGB at the console's size, lossless
 and checked by construction, for when every level matters more than which
 player opens it.
 
