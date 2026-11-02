@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/gufranco/fmv-core-python/compare/v1.3.0...v1.4.0) (2026-11-02)
+
+
+### Features
+
+* **video:** near-lossless preview video ([9556081](https://github.com/gufranco/fmv-core-python/commit/95560815334daf3351db7e43faf089e01e7b49ec))
+
 # [1.3.0](https://github.com/gufranco/fmv-core-python/compare/v1.2.0...v1.3.0) (2026-11-02)
 
 
