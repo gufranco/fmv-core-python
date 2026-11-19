@@ -6,16 +6,16 @@ requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
-    "numpy==2.5.4",
+    "numpy==2.5.5",
 ]
 
 [dependency-groups]
 dev = [
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
-    "ruff==0.17.4",
+    "ruff==0.17.5",
     "mypy==2.4.1",
-    "faker==40.52.0",
+    "faker==40.54.0",
 ]
 
 [build-system]
